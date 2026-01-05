@@ -13,6 +13,23 @@ class OrderController extends GetxController {
     fetchOrders();
   }
 
+  Future<void> updateOrderStatus(int id, String status) async {
+    try {
+      await _apiService.updateOrderStatus(id.toString(), status);
+      // Refresh list locally or via fetch
+      final index = orders.indexWhere((o) => o.id == id);
+      if (index != -1) {
+        // Create new object with updating status to avoid full refresh flicker
+        // Assuming OrderModel has copyWith or manual update. Model is simple class though.
+        // Easiest is to refetch or manually update list if valid
+        fetchOrders();
+      }
+      Get.snackbar('Sukses', 'Status pesanan berhasil diperbarui');
+    } catch (e) {
+      Get.snackbar('Error', 'Gagal memperbarui status: $e');
+    }
+  }
+
   Future<void> fetchOrders() async {
     isLoading.value = true;
     try {
@@ -24,7 +41,7 @@ class OrderController extends GetxController {
         orders.value = results.map((e) => OrderModel.fromJson(e)).toList();
       }
     } catch (e) {
-      Get.snackbar('Error', 'Failed to fetch orders: $e');
+      Get.snackbar('Error', 'Gagal memuat pesanan: $e');
     } finally {
       isLoading.value = false;
     }

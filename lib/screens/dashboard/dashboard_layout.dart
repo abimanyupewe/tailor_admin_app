@@ -3,8 +3,9 @@ import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:tailor_admin_app/controllers/dashboard_controller.dart';
 import 'package:tailor_admin_app/screens/dashboard/overview_page.dart';
-import 'package:tailor_admin_app/screens/users/user_list_screen.dart';
 import 'package:tailor_admin_app/screens/orders/order_list_screen.dart';
+import 'package:tailor_admin_app/screens/chat/chat_list_screen.dart';
+import 'package:tailor_admin_app/screens/profile/profile_screen.dart';
 
 class DashboardLayout extends StatelessWidget {
   const DashboardLayout({super.key});
@@ -18,7 +19,12 @@ class DashboardLayout extends StatelessWidget {
       body: Obx(
         () => IndexedStack(
           index: controller.tabIndex.value,
-          children: const [OverviewPage(), UserListScreen(), OrderListScreen()],
+          children: const [
+            OverviewPage(),
+            OrderListScreen(),
+            ChatListScreen(),
+            ProfileScreen(),
+          ],
         ),
       ),
       bottomNavigationBar: Obx(
@@ -27,8 +33,9 @@ class DashboardLayout extends StatelessWidget {
           onDestinationSelected: controller.changeTabIndex,
           destinations: const [
             NavigationDestination(icon: Icon(Iconsax.home), label: 'Overview'),
-            NavigationDestination(icon: Icon(Iconsax.people), label: 'Users'),
             NavigationDestination(icon: Icon(Iconsax.box), label: 'Orders'),
+            NavigationDestination(icon: Icon(Iconsax.message), label: 'Chat'),
+            NavigationDestination(icon: Icon(Iconsax.user), label: 'Profile'),
           ],
         ),
       ),

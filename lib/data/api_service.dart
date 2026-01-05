@@ -310,4 +310,81 @@ class ApiService extends GetxService {
     );
     return _handleResponse(response);
   }
+
+  // --- Dashboard ---
+  Future<dynamic> getDashboardSummary({int range = 7}) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/tailor/dashboard/summary/?range=$range'),
+      headers: _headers,
+    );
+    return _handleResponse(response);
+  }
+
+  // --- Manage Services ---
+  Future<dynamic> updateService(int id, Map<String, dynamic> data) async {
+    final response = await http.patch(
+      Uri.parse('$baseUrl/api/tailor/manage/services/$id/'),
+      headers: _headers,
+      body: json.encode(data),
+    );
+    return _handleResponse(response);
+  }
+
+  Future<dynamic> deleteService(int id) async {
+    final response = await http.delete(
+      Uri.parse('$baseUrl/api/tailor/manage/services/$id/'),
+      headers: _headers,
+    );
+    if (response.statusCode == 204) return true;
+    return _handleResponse(response);
+  }
+
+  // --- Manage Portfolio (Posts) ---
+  Future<dynamic> getPosts() async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/tailor/manage/posts/'),
+      headers: _headers,
+    );
+    return _handleResponse(response);
+  }
+
+  Future<dynamic> deletePost(int id) async {
+    final response = await http.delete(
+      Uri.parse('$baseUrl/api/tailor/manage/posts/$id/'),
+      headers: _headers,
+    );
+    if (response.statusCode == 204) return true;
+    return _handleResponse(response);
+  }
+
+  // --- Chat ---
+  Future<dynamic> getChatRooms() async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/chat/rooms/'),
+      headers: _headers,
+    );
+    return _handleResponse(response);
+  }
+
+  Future<dynamic> getChatMessages(int roomId) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/chat/messages/?room_id=$roomId'),
+      headers: _headers,
+    );
+    return _handleResponse(response);
+  }
+
+  Future<dynamic> sendMessage(int roomId, String text) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/chat/messages/'),
+      headers: _headers,
+      body: json.encode({
+        'room_id':
+            roomId, // API usually expects room_id or similar, adjusting based on prompt "room": {ROOM_ID}
+        'room': roomId,
+        'text': text,
+      }),
+    );
+    return _handleResponse(response);
+  }
 }

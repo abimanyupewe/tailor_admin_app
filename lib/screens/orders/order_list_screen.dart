@@ -62,22 +62,43 @@ class OrderListScreen extends StatelessWidget {
                         Text('\$${order.totalPrice.toStringAsFixed(2)}'),
                       ),
                       DataCell(
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: _getStatusColor(
+                        InkWell(
+                          onTap: () {
+                            _showStatusDialog(
+                              context,
+                              controller,
+                              order.id,
                               order.status,
-                            ).withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            order.status,
-                            style: TextStyle(
-                              color: _getStatusColor(order.status),
-                              fontWeight: FontWeight.bold,
+                            );
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: _getStatusColor(
+                                order.status,
+                              ).withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  order.status,
+                                  style: TextStyle(
+                                    color: _getStatusColor(order.status),
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                Icon(
+                                  Icons.edit,
+                                  size: 14,
+                                  color: _getStatusColor(order.status),
+                                ),
+                              ],
                             ),
                           ),
                         ),
@@ -96,16 +117,63 @@ class OrderListScreen extends StatelessWidget {
     );
   }
 
+  void _showStatusDialog(
+    BuildContext context,
+    OrderController controller,
+    int id,
+    String currentStatus,
+  ) {
+    final statuses = [
+      'PENDING',
+      'ACCEPTED',
+      'IN_PROGRESS',
+      'COMPLETED',
+      'CANCELLED',
+    ];
+
+    Get.dialog(
+      AlertDialog(
+        title: const Text('Update Status Pesanan'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: statuses
+              .map(
+                (status) => ListTile(
+                  title: Text(status),
+                  leading: Radio<String>(
+                    value: status,
+                    groupValue: currentStatus.toUpperCase(),
+                    onChanged: (val) {
+                      if (val != null) {
+                        controller.updateOrderStatus(id, val);
+                        Get.back(); // Close dialog
+                      }
+                    },
+                  ),
+                  onTap: () {
+                    controller.updateOrderStatus(id, status);
+                    Get.back();
+                  },
+                ),
+              )
+              .toList(),
+        ),
+      ),
+    );
+  }
+
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
       case 'completed':
         return Colors.green;
+      case 'accepted':
+        return Colors.teal;
+      case 'in_progress':
+        return Colors.blue;
       case 'pending':
         return Colors.orange;
       case 'cancelled':
         return Colors.red;
-      case 'processing':
-        return Colors.blue;
       default:
         return Colors.grey;
     }
