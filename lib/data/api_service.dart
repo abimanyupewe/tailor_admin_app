@@ -161,7 +161,8 @@ class ApiService extends GetxService {
 
   Future<dynamic> updateProfileMultipart({
     required Map<String, String> data,
-    File? imageFile,
+    File? avatarFile,
+    File? shopImageFile,
   }) async {
     var request = http.MultipartRequest(
       'PUT',
@@ -171,9 +172,17 @@ class ApiService extends GetxService {
     request.headers.addAll(_headers);
     request.fields.addAll(data);
 
-    if (imageFile != null) {
+    if (avatarFile != null) {
       request.files.add(
-        await http.MultipartFile.fromPath('avatar', imageFile.path),
+        await http.MultipartFile.fromPath('avatar', avatarFile.path),
+      );
+    }
+
+    // For shop image (Tailor profile)
+    // The field name depends on backend. Usually 'shop_image' based on key in json
+    if (shopImageFile != null) {
+      request.files.add(
+        await http.MultipartFile.fromPath('shop_image', shopImageFile.path),
       );
     }
 
@@ -234,12 +243,34 @@ class ApiService extends GetxService {
   }
 
   Future<dynamic> addPost(Map<String, dynamic> data) async {
-    // Note: Use MultipartRequest for file uploads if needed, assuming JSON for now as per prompt "POST"
     final response = await http.post(
       Uri.parse('$baseUrl/api/tailor/manage/posts/'),
       headers: _headers,
       body: json.encode(data),
     );
+    return _handleResponse(response);
+  }
+
+  Future<dynamic> addPostMultipart({
+    required String caption,
+    File? imageFile,
+  }) async {
+    var request = http.MultipartRequest(
+      'POST',
+      Uri.parse('$baseUrl/api/tailor/manage/posts/'),
+    );
+
+    request.headers.addAll(_headers);
+    request.fields['caption'] = caption;
+
+    if (imageFile != null) {
+      request.files.add(
+        await http.MultipartFile.fromPath('image', imageFile.path),
+      );
+    }
+
+    final streamedResponse = await request.send();
+    final response = await http.Response.fromStream(streamedResponse);
     return _handleResponse(response);
   }
 

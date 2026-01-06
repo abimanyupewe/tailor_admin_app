@@ -144,41 +144,108 @@ class PortfolioScreen extends StatelessWidget {
 
   void _showAddPostDialog(BuildContext context, PostController controller) {
     final captionController = TextEditingController();
-    // In a real app, handle file selection UI state here
+    File? selectedImage;
 
     Get.dialog(
-      AlertDialog(
-        title: const Text('Tambah Postingan'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Placeholder for Image Picker UI
-            Container(
-              height: 100,
-              color: Colors.grey[200],
-              child: const Center(
-                child: Text('Pilih Gambar (Fitur dalam pengembangan)'),
+      StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: const Text('Tambah Postingan'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                GestureDetector(
+                  onTap: () async {
+                    final file = await controller.pickImage();
+                    if (file != null) {
+                      setState(() {
+                        selectedImage = file;
+                      });
+                    }
+                  },
+                  child: Container(
+                    height: 150,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(12),
+                      image: selectedImage != null
+                          ? DecorationImage(
+                              image: FileImage(selectedImage!),
+                              fit: BoxFit.cover,
+                            )
+                          : null,
+                    ),
+                    child: selectedImage == null
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(
+                                  Iconsax.camera,
+                                  size: 32,
+                                  color: Colors.grey,
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Ketuk untuk pilih gambar',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    color: Colors.grey[600],
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        : null,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: captionController,
+                  decoration: const InputDecoration(
+                    labelText: 'Caption',
+                    border: OutlineInputBorder(),
+                  ),
+                  maxLines: 3,
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Get.back(),
+                child: const Text('Batal'),
               ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: captionController,
-              decoration: const InputDecoration(labelText: 'Caption'),
-              maxLines: 3,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(onPressed: () => Get.back(), child: const Text('Batal')),
-          ElevatedButton(
-            onPressed: () {
-              // Sending null file for now as implementation of multipart in ApiService wasn't requested in detail
-              // to be changed.
-              controller.addPost(captionController.text, null);
-            },
-            child: const Text('Posting'),
-          ),
-        ],
+              Obx(
+                () => ElevatedButton(
+                  onPressed: controller.isUploading.value
+                      ? null
+                      : () {
+                          if (captionController.text.isEmpty &&
+                              selectedImage == null) {
+                            Get.snackbar(
+                              'Error',
+                              'Mohon isi caption atau gambar',
+                            );
+                            return;
+                          }
+                          controller.addPost(
+                            captionController.text,
+                            selectedImage,
+                          );
+                        },
+                  child: controller.isUploading.value
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text('Posting'),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

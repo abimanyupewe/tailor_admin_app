@@ -4,7 +4,12 @@ class UserModel {
   final String email;
   final String role;
   final bool isActive;
-  final String? avatar; // Optional avatar
+  final String? avatar; // User avatar
+
+  // Tailor specific fields
+  final String? shopName;
+  final String? bio;
+  final String? shopImage;
 
   UserModel({
     required this.id,
@@ -13,24 +18,37 @@ class UserModel {
     required this.role,
     required this.isActive,
     this.avatar,
+    this.shopName,
+    this.bio,
+    this.shopImage,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
-    // Handle potential wrapper like { "data": {...} } or { "user": {...} }
-    Map<String, dynamic> data = json;
-    if (json.containsKey('data') && json['data'] is Map) {
-      data = json['data'];
-    } else if (json.containsKey('user') && json['user'] is Map) {
-      data = json['user'];
+    // 1. Try to extract User data
+    // If json has 'user' key (Tailor profile structure), use that for user details
+    Map<String, dynamic> userData = json;
+    if (json.containsKey('user') && json['user'] is Map) {
+      userData = json['user'];
+    } else if (json.containsKey('data') && json['data'] is Map) {
+      userData = json['data'];
     }
 
+    // 2. Extract Tailor data from root if available
+    // (If json IS the tailor profile, it has shop_name at root)
+    String? shopName = json['shop_name'];
+    String? bio = json['bio'];
+    String? shopImage = json['shop_image'];
+
     return UserModel(
-      id: data['id'] ?? 0,
-      username: data['username'] ?? data['name'] ?? 'Unknown',
-      email: data['email'] ?? '',
-      role: data['role'] ?? 'user',
-      isActive: data['is_active'] ?? true,
-      avatar: data['avatar'],
+      id: userData['id'] ?? 0,
+      username: userData['username'] ?? userData['name'] ?? 'Unknown',
+      email: userData['email'] ?? '',
+      role: userData['role'] ?? 'user',
+      isActive: userData['is_active'] ?? true,
+      avatar: userData['avatar'],
+      shopName: shopName,
+      bio: bio,
+      shopImage: shopImage,
     );
   }
 }

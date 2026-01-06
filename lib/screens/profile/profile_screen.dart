@@ -6,6 +6,7 @@ import 'package:tailor_admin_app/controllers/profile_controller.dart';
 import 'package:tailor_admin_app/screens/services/service_list_screen.dart';
 import 'package:tailor_admin_app/screens/portfolio/portfolio_screen.dart';
 import 'package:tailor_admin_app/screens/location/manage_location_screen.dart';
+import 'package:tailor_admin_app/screens/profile/edit_profile_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -133,9 +134,7 @@ class ProfileScreen extends StatelessWidget {
               _buildMenuOption(
                 icon: Iconsax.edit,
                 title: 'Edit Profile',
-                onTap: () {
-                  Get.snackbar('Info', 'Fitur Edit Profile akan segera hadir');
-                },
+                onTap: () => Get.to(() => const EditProfileScreen()),
               ),
               const SizedBox(height: 12),
               _buildMenuOption(

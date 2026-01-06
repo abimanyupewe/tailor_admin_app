@@ -8,6 +8,7 @@ class PostController extends GetxController {
   final ApiService _apiService = Get.find<ApiService>();
   final posts = <PostModel>[].obs;
   final isLoading = true.obs;
+  final isUploading = false.obs;
 
   @override
   void onInit() {
@@ -33,31 +34,27 @@ class PostController extends GetxController {
   }
 
   Future<void> addPost(String caption, File? imageFile) async {
-    // Note: The prompt's ApiService used json body for addPost, but real world usually needs Multipart
-    // I will use addPost from ApiService but it expects Map<String, dynamic> body (JSON).
-    // If image needs upload, typically we use multipart.
-    // Assuming for now the API might accept Base64 or standard multipart.
-    // Since ApiService.addPost is using JSON body, I will stick to what it accepts or modify it.
-    // However, for posts with images, JSON is rare unless Base64.
-    // Let's assume we need to update ApiService if we want real file upload,
-    // OR just sending caption if image logic is complex for now.
-    // BUT the prompt says "Post" and usually implies images.
-    // Let's modify ApiService.addPost later if needed, but for now I will try to call it.
-
+    isUploading.value = true;
     try {
-      // Logic for File upload usually requires MultipartRequest.
-      // Current ApiService.addPost sends JSON.
-      // I will implement a basic version that sends data, acknowledging limitation.
-      final data = {
-        'caption': caption,
-        // 'image': base64... if supported
-      };
-      await _apiService.addPost(data);
+      if (imageFile == null) {
+        // If no image, try basic addPost or warn
+        // For now let's allow text only if backend supports it, but "Post" usually implies image
+        // Let's assume we use addPostMultipart with just caption if no image
+        await _apiService.addPostMultipart(caption: caption, imageFile: null);
+      } else {
+        await _apiService.addPostMultipart(
+          caption: caption,
+          imageFile: imageFile,
+        );
+      }
+
       Get.snackbar('Sukses', 'Postingan berhasil ditambahkan');
       fetchPosts();
       Get.back();
     } catch (e) {
       Get.snackbar('Error', 'Gagal menambah postingan: $e');
+    } finally {
+      isUploading.value = false;
     }
   }
 

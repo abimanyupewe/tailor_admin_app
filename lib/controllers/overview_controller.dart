@@ -51,7 +51,7 @@ class OverviewController extends GetxController {
             // Note: ApiService needs a helper or we manually call http?
             // Let's assume we added fetchByUrl or we hack it.
             // Since I added fetchByUrl a moment ago, let's use it.
-            var nextResponse = await _apiService.fetchByUrl(nextUrl!);
+            var nextResponse = await _apiService.fetchByUrl(nextUrl);
             if (nextResponse is Map && nextResponse.containsKey('results')) {
               allOrders.addAll(nextResponse['results']);
               nextUrl = nextResponse['next'];
