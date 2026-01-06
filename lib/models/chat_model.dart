@@ -16,12 +16,28 @@ class ChatRoom {
   factory ChatRoom.fromJson(Map<String, dynamic> json) {
     // Adjust logic based on real API response structure if needed
     // Assuming structure: { id, user: { name, avatar }, last_message, timestamp }
+    // Flexible user parsing
+    String name = 'User';
+    String? avatar;
+
+    var userData = json['user'] ?? json['participant'] ?? json['sender'];
+    if (userData != null) {
+      if (userData is Map) {
+        name = userData['username'] ?? userData['name'] ?? name;
+        avatar = userData['avatar'];
+      } else if (userData is String) {
+        name = userData;
+      } else if (userData is int) {
+        name = 'User #$userData';
+      }
+    }
+
     return ChatRoom(
       id: json['id'] ?? 0,
-      userName: json['user']?['username'] ?? 'User',
+      userName: name,
       lastMessage: json['last_message'],
       lastMessageTime: json['updated_at'] ?? '',
-      userAvatar: json['user']?['avatar'],
+      userAvatar: avatar,
     );
   }
 }

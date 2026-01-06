@@ -14,12 +14,21 @@ class OrderModel {
   });
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
+    // Check for 'user', 'customer', or 'buyer' keys
+    var userData = json['user'] ?? json['customer'] ?? json['buyer'];
     String userDisplay = 'Guest';
-    if (json['user'] != null) {
-      if (json['user'] is Map) {
-        userDisplay = json['user']['username'] ?? 'Unknown';
-      } else if (json['user'] is String) {
-        userDisplay = json['user'];
+
+    if (userData != null) {
+      if (userData is Map) {
+        userDisplay =
+            userData['username'] ??
+            userData['name'] ??
+            userData['email'] ??
+            'Unknown';
+      } else if (userData is String) {
+        userDisplay = userData;
+      } else if (userData is int) {
+        userDisplay = 'User #$userData';
       }
     }
 

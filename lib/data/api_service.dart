@@ -59,8 +59,16 @@ class ApiService extends GetxService {
     return headers;
   }
 
+  Future<dynamic> fetchByUrl(String url) async {
+    // Helper to fetch pagination next links directly
+    final response = await http.get(Uri.parse(url), headers: _headers);
+    return _handleResponse(response);
+  }
+
   Future<dynamic> _handleResponse(http.Response response) async {
     if (response.statusCode >= 200 && response.statusCode < 300) {
+      // DEBUG: Print response for troubleshooting
+      print('API Response [${response.request?.url}]: ${response.body}');
       return json.decode(response.body);
     } else {
       String errorMessage = 'Error ${response.statusCode}';

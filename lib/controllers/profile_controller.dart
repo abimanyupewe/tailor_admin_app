@@ -19,6 +19,7 @@ class ProfileController extends GetxController {
       final response = await _apiService.getProfile();
       user.value = UserModel.fromJson(response);
     } catch (e) {
+      print('Profile Controller Error: $e');
       Get.snackbar('Error', 'Failed to fetch profile: $e');
     } finally {
       isLoading.value = false;
