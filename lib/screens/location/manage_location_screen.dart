@@ -120,10 +120,19 @@ class ManageLocationScreen extends StatelessWidget {
                           );
 
                           // Handle result
-                          if (result != null && result is LatLng) {
-                            latController.text = result.latitude.toString();
-                            longController.text = result.longitude.toString();
-                            // Optional: Reverse geocode to get address could be added later
+                          if (result != null) {
+                            if (result is Map) {
+                              final latlng = result['latlng'] as LatLng;
+                              final address = result['address'] as String;
+
+                              latController.text = latlng.latitude.toString();
+                              longController.text = latlng.longitude.toString();
+                              addressController.text = address;
+                            } else if (result is LatLng) {
+                              // Fallback for backward compatibility
+                              latController.text = result.latitude.toString();
+                              longController.text = result.longitude.toString();
+                            }
                           }
                         },
                         icon: const Icon(Iconsax.map),
