@@ -99,15 +99,6 @@ class ApiService extends GetxService {
   }
 
   // --- Authentication ---
-  Future<dynamic> registerCustomer(Map<String, dynamic> data) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/api/users/auth/register/'),
-      headers: _headers,
-      body: json.encode(data),
-    );
-    return _handleResponse(response);
-  }
-
   Future<dynamic> registerTailor(Map<String, dynamic> data) async {
     final response = await http.post(
       Uri.parse('$baseUrl/api/users/auth/register-tailor/'),
@@ -417,12 +408,7 @@ class ApiService extends GetxService {
     final response = await http.post(
       Uri.parse('$baseUrl/api/chat/messages/'),
       headers: _headers,
-      body: json.encode({
-        'room_id':
-            roomId, // API usually expects room_id or similar, adjusting based on prompt "room": {ROOM_ID}
-        'room': roomId,
-        'text': text,
-      }),
+      body: json.encode({'room_id': roomId, 'room': roomId, 'text': text}),
     );
     return _handleResponse(response);
   }
