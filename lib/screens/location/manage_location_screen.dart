@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tailor_admin_app/controllers/location_controller.dart';
+import 'package:tailor_admin_app/screens/location/location_picker_screen.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:iconsax/iconsax.dart';
 
 class ManageLocationScreen extends StatelessWidget {
   const ManageLocationScreen({super.key});
@@ -97,6 +100,45 @@ class ManageLocationScreen extends StatelessWidget {
                         ),
                       ],
                     ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: () async {
+                          // Get current values or default
+                          double currentLat =
+                              double.tryParse(latController.text) ?? 0.0;
+                          double currentLng =
+                              double.tryParse(longController.text) ?? 0.0;
+
+                          // Navigate to picker
+                          final result = await Get.to(
+                            () => LocationPickerScreen(
+                              initialLat: currentLat,
+                              initialLng: currentLng,
+                            ),
+                          );
+
+                          // Handle result
+                          if (result != null && result is LatLng) {
+                            latController.text = result.latitude.toString();
+                            longController.text = result.longitude.toString();
+                            // Optional: Reverse geocode to get address could be added later
+                          }
+                        },
+                        icon: const Icon(Iconsax.map),
+                        label: Text(
+                          'Pilih Lewat Peta',
+                          style: GoogleFonts.plusJakartaSans(),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                    ),
                     const SizedBox(height: 24),
                     SizedBox(
                       width: double.infinity,
@@ -130,7 +172,7 @@ class ManageLocationScreen extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               const Text(
-                'Tip: Anda bisa mendapatkan Latitude dan Longitude dari Google Maps.',
+                'Tip: Anda bisa mendapatkan Latitude dan Longitude dari Google Maps\natau gunakan "Pilih Lewat Peta".',
                 style: TextStyle(color: Colors.grey),
                 textAlign: TextAlign.center,
               ),

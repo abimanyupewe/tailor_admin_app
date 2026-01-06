@@ -111,7 +111,7 @@ class ApiService extends GetxService {
   Future<dynamic> registerTailor(Map<String, dynamic> data) async {
     final response = await http.post(
       Uri.parse('$baseUrl/api/users/auth/register-tailor/'),
-      headers: _headers,
+      headers: {'Content-Type': 'application/json'},
       body: json.encode(data),
     );
     return _handleResponse(response);

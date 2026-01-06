@@ -4,20 +4,23 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:tailor_admin_app/controllers/auth_controller.dart';
 
-class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
+class SignupScreen extends StatelessWidget {
+  const SignupScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<AuthController>();
     final usernameController = TextEditingController();
+
     final passwordController = TextEditingController();
+    final confirmPasswordController = TextEditingController();
     final formKey = GlobalKey<FormState>();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6FA), // Light grey background
+      backgroundColor: const Color(0xFFF5F6FA),
       body: Center(
         child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(vertical: 24),
           child: Container(
             width: 400,
             padding: const EdgeInsets.all(32),
@@ -40,7 +43,7 @@ class LoginScreen extends StatelessWidget {
                 children: [
                   Center(
                     child: Text(
-                      'Tailor Admin',
+                      'Create Account',
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -51,7 +54,7 @@ class LoginScreen extends StatelessWidget {
                   const SizedBox(height: 8),
                   Center(
                     child: Text(
-                      'Sign in to manage your tailor shop',
+                      'Join as a Tailor Partner',
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 14,
                         color: Colors.grey[600],
@@ -59,70 +62,77 @@ class LoginScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 32),
-                  Text(
-                    'Username',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                    ),
-                  ),
+
+                  // Username
+                  _buildLabel('Username'),
                   const SizedBox(height: 8),
                   TextFormField(
                     controller: usernameController,
-                    decoration: InputDecoration(
-                      hintText: 'Enter your username',
-                      prefixIcon: const Icon(Iconsax.user),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Colors.grey[300]!),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Colors.grey.shade300),
-                      ),
+                    decoration: _inputDecoration(
+                      'Enter username',
+                      Iconsax.user,
                     ),
-                    validator: (value) =>
-                        (value ?? '').isEmpty ? 'Please enter username' : null,
+                    validator: (v) => (v ?? '').isEmpty ? 'Required' : null,
                   ),
-                  const SizedBox(height: 24),
-                  Text(
-                    'Password',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 16),
+
+                  // Password
+                  _buildLabel('Password'),
                   const SizedBox(height: 8),
                   Obx(
                     () => TextFormField(
                       controller: passwordController,
                       obscureText: controller.isPasswordHidden.value,
-                      decoration: InputDecoration(
-                        hintText: 'Enter your password',
-                        prefixIcon: const Icon(Iconsax.lock),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            controller.isPasswordHidden.value
-                                ? Iconsax.eye_slash
-                                : Iconsax.eye,
+                      decoration:
+                          _inputDecoration(
+                            'Enter password',
+                            Iconsax.lock,
+                          ).copyWith(
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                controller.isPasswordHidden.value
+                                    ? Iconsax.eye_slash
+                                    : Iconsax.eye,
+                              ),
+                              onPressed: controller.togglePasswordVisibility,
+                            ),
                           ),
-                          onPressed: controller.togglePasswordVisibility,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.grey[300]!),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
-                        ),
-                      ),
-                      validator: (value) => (value ?? '').isEmpty
-                          ? 'Please enter password'
-                          : null,
+                      validator: (v) =>
+                          (v ?? '').length < 6 ? 'Min 6 chars' : null,
                     ),
                   ),
+                  const SizedBox(height: 16),
+
+                  // Confirm Password
+                  _buildLabel('Confirm Password'),
+                  const SizedBox(height: 8),
+                  Obx(
+                    () => TextFormField(
+                      controller: confirmPasswordController,
+                      obscureText: controller.isConfirmPasswordHidden.value,
+                      decoration:
+                          _inputDecoration(
+                            'Confirm password',
+                            Iconsax.lock,
+                          ).copyWith(
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                controller.isConfirmPasswordHidden.value
+                                    ? Iconsax.eye_slash
+                                    : Iconsax.eye,
+                              ),
+                              onPressed:
+                                  controller.toggleConfirmPasswordVisibility,
+                            ),
+                          ),
+                      validator: (v) {
+                        if (v != passwordController.text)
+                          return 'Password mismatch';
+                        return null;
+                      },
+                    ),
+                  ),
+
                   const SizedBox(height: 32),
                   SizedBox(
                     width: double.infinity,
@@ -133,9 +143,10 @@ class LoginScreen extends StatelessWidget {
                             ? null
                             : () {
                                 if (formKey.currentState!.validate()) {
-                                  controller.login(
+                                  controller.register(
                                     usernameController.text,
                                     passwordController.text,
+                                    confirmPasswordController.text,
                                   );
                                 }
                               },
@@ -146,16 +157,11 @@ class LoginScreen extends StatelessWidget {
                           ),
                         ),
                         child: controller.isLoading.value
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2,
-                                ),
+                            ? const CircularProgressIndicator(
+                                color: Colors.white,
                               )
                             : Text(
-                                'Sign In',
+                                'Sign Up',
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
@@ -171,15 +177,15 @@ class LoginScreen extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          "Don't have an account? ",
+                          "Already have an account? ",
                           style: GoogleFonts.plusJakartaSans(
                             color: Colors.grey[600],
                           ),
                         ),
-                        TextButton(
-                          onPressed: () => Get.toNamed('/signup'),
+                        GestureDetector(
+                          onTap: () => Get.back(),
                           child: Text(
-                            "Sign Up",
+                            "Sign In",
                             style: GoogleFonts.plusJakartaSans(
                               color: const Color(0xFF3F51B5),
                               fontWeight: FontWeight.bold,
@@ -197,5 +203,29 @@ class LoginScreen extends StatelessWidget {
       ),
     );
   }
-}
 
+  Widget _buildLabel(String text) {
+    return Text(
+      text,
+      style: GoogleFonts.plusJakartaSans(
+        fontWeight: FontWeight.w600,
+        fontSize: 14,
+      ),
+    );
+  }
+
+  InputDecoration _inputDecoration(String hint, IconData icon) {
+    return InputDecoration(
+      hintText: hint,
+      prefixIcon: Icon(icon),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.grey.shade300),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.grey.shade300),
+      ),
+    );
+  }
+}
