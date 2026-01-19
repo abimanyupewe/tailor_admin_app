@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:tailor_admin_app/bindings/initial_binding.dart';
-import 'package:tailor_admin_app/bindings/initial_binding.dart';
+// import 'package:tailor_admin_app/bindings/initial_binding.dart';
 import 'package:tailor_admin_app/routes/app_routes.dart';
 
 void main() async {
