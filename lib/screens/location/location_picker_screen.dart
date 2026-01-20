@@ -35,16 +35,25 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
     super.initState();
     _mapController = MapController();
 
-    // Check if valid initial coordinates are provided
-    if (widget.initialLat != 0 && widget.initialLng != 0) {
-      _currentCenter = LatLng(widget.initialLat, widget.initialLng);
-      _hasInitialLocation = true;
-      _getAddressFromLatLng(_currentCenter);
-    } else {
-      // Default fallback (Jakarta) but we will try to get real location
-      _currentCenter = const LatLng(-6.200000, 106.816666);
-      _getCurrentLocation();
+    // 1. Set initial center from arguments OR default Jakarta
+    double lat = widget.initialLat;
+    double lng = widget.initialLng;
+
+    // Check if arguments are effectively "empty" (0.0)
+    if (lat == 0 && lng == 0) {
+      lat = -6.200000;
+      lng = 106.816666;
     }
+
+    _currentCenter = LatLng(lat, lng);
+    _hasInitialLocation = true; // Show map immediately with whatever we have
+
+    // 2. ALWAYS try to get current GPS location to update map center
+    // This satisfies "lokasi mengikuti lokasi user saat ini"
+    _getCurrentLocation();
+
+    // 3. Reverse geocode the initial point just in case
+    _getAddressFromLatLng(_currentCenter);
   }
 
   Future<void> _getCurrentLocation() async {
@@ -257,11 +266,6 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                         hintText: 'Cari lokasi (cth: Monas, Jakarta)...',
                         hintStyle: GoogleFonts.plusJakartaSans(fontSize: 14),
                         prefixIcon: const Icon(Iconsax.search_normal),
-                        suffixIcon: IconButton(
-                          icon: const Icon(Icons.search),
-                          onPressed: () =>
-                              _searchLocation(_searchController.text),
-                        ),
                         border: InputBorder.none,
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 16,
