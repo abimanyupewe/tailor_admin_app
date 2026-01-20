@@ -62,76 +62,91 @@ class ServiceListScreen extends StatelessWidget {
           separatorBuilder: (context, index) => const SizedBox(height: 12),
           itemBuilder: (context, index) {
             final service = controller.services[index];
-            return Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
+            return Opacity(
+              opacity: service.isActive ? 1.0 : 0.5,
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
                     ),
-                    child: const Icon(Iconsax.scissor, color: Colors.blue),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          service.name,
-                          style: GoogleFonts.plusJakartaSans(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Rp ${service.price.toStringAsFixed(0)}',
-                          style: GoogleFonts.plusJakartaSans(
-                            color: Colors.green,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        if (service.description.isNotEmpty)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 4),
-                            child: Text(
-                              service.description,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                color: Colors.grey[600],
-                                fontSize: 12,
-                              ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(Iconsax.scissor, color: Colors.blue),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            service.name,
+                            style: GoogleFonts.plusJakartaSans(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
                             ),
                           ),
-                      ],
+                          const SizedBox(height: 4),
+                          Text(
+                            'Rp ${service.price.toStringAsFixed(0)}',
+                            style: GoogleFonts.plusJakartaSans(
+                              color: Colors.green,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          if (service.description.isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 4),
+                              child: Text(
+                                service.description,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
                     ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Iconsax.edit, color: Colors.orange),
-                    onPressed: () =>
-                        _showServiceDialog(context, controller, service),
-                  ),
-                  IconButton(
-                    icon: const Icon(Iconsax.trash, color: Colors.red),
-                    onPressed: () =>
-                        _confirmDelete(context, controller, service.id),
-                  ),
-                ],
+                    IconButton(
+                      icon: const Icon(Iconsax.edit, color: Colors.orange),
+                      onPressed: () =>
+                          _showServiceDialog(context, controller, service),
+                    ),
+                    IconButton(
+                      icon: const Icon(Iconsax.trash, color: Colors.red),
+                      onPressed: () =>
+                          _confirmDelete(context, controller, service.id),
+                    ),
+                    Transform.scale(
+                      scale: 0.8,
+                      child: Switch(
+                        value: service.isActive,
+                        activeColor: Colors.green,
+                        onChanged: (val) {
+                          controller.updateService(service.id, {
+                            'is_active': val,
+                          });
+                        },
+                      ),
+                    ),
+                  ],
+                ),
               ),
             );
           },
@@ -146,9 +161,17 @@ class ServiceListScreen extends StatelessWidget {
     ServiceModel? service,
   ) {
     final nameController = TextEditingController(text: service?.name);
-    final priceController = TextEditingController(
-      text: service?.price.toString(),
-    );
+    String priceText = '';
+    if (service != null) {
+      // If price is an integer (e.g. 10000.0), display as 10000
+      if (service.price % 1 == 0) {
+        priceText = service.price.toInt().toString();
+      } else {
+        priceText = service.price.toString();
+      }
+    }
+
+    final priceController = TextEditingController(text: priceText);
     final descController = TextEditingController(text: service?.description);
     final durationController = TextEditingController(text: service?.duration);
 
@@ -187,12 +210,55 @@ class ServiceListScreen extends StatelessWidget {
           TextButton(onPressed: () => Get.back(), child: const Text('Batal')),
           ElevatedButton(
             onPressed: () {
+              if (nameController.text.isEmpty) {
+                Get.snackbar(
+                  'Error',
+                  'Nama layanan tidak boleh kosong',
+                  backgroundColor: Colors.red[100],
+                  colorText: Colors.red,
+                );
+                return;
+              }
+
+              final price = double.tryParse(priceController.text);
+              if (price == null || price <= 0) {
+                Get.snackbar(
+                  'Error',
+                  'Harga harus berupa angka valid dan lebih dari 0',
+                  backgroundColor: Colors.red[100],
+                  colorText: Colors.red,
+                );
+                return;
+              }
+
+              if (durationController.text.isEmpty) {
+                Get.snackbar(
+                  'Error',
+                  'Durasi tidak boleh kosong',
+                  backgroundColor: Colors.red[100],
+                  colorText: Colors.red,
+                );
+                return;
+              }
+
+              // Parse duration to int
+              int durationDays = 1;
+              final durationText = durationController.text.replaceAll(
+                RegExp(r'[^0-9]'),
+                '',
+              );
+              if (durationText.isNotEmpty) {
+                durationDays = int.tryParse(durationText) ?? 1;
+              }
+
               final data = {
                 'name': nameController.text,
-                'price': double.tryParse(priceController.text) ?? 0,
+                'base_price': price, // Backend expects base_price
                 'description': descController.text,
-                'duration': durationController.text,
+                'estimated_duration_days': durationDays, // Send as int
+                'service_type': 'PERMAK', // Default value hidden from user
               };
+
               if (service == null) {
                 controller.addService(data);
               } else {

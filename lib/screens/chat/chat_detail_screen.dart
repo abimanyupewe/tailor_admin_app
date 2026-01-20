@@ -3,8 +3,11 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:tailor_admin_app/controllers/chat_controller.dart';
+import 'package:tailor_admin_app/data/api_service.dart';
 import 'package:tailor_admin_app/models/chat_model.dart';
 import 'package:intl/intl.dart';
+
+import 'dart:async'; // Add this import
 
 class ChatDetailScreen extends StatefulWidget {
   final ChatRoom room;
@@ -18,15 +21,23 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
   final ChatController controller = Get.find<ChatController>();
   final TextEditingController _msgController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  Timer? _timer;
 
   @override
   void initState() {
     super.initState();
     controller.fetchMessages(widget.room.id);
+    // Poll every 5 seconds
+    _timer = Timer.periodic(const Duration(seconds: 5), (timer) {
+      if (mounted) {
+        controller.fetchMessages(widget.room.id);
+      }
+    });
   }
 
   @override
   void dispose() {
+    _timer?.cancel();
     _msgController.dispose();
     _scrollController.dispose();
     super.dispose();
@@ -46,8 +57,10 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
               backgroundColor: Colors.grey[200],
               backgroundImage: widget.room.userAvatar != null
                   ? NetworkImage(
-                      widget.room.userAvatar!,
-                    ) // Use ApiService.getImageUrl logic if relative
+                      Get.find<ApiService>().getImageUrl(
+                        widget.room.userAvatar,
+                      ),
+                    )
                   : null,
               child: widget.room.userAvatar == null
                   ? const Icon(Iconsax.user, color: Colors.grey)

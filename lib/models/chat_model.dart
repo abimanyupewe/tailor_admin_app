@@ -32,10 +32,21 @@ class ChatRoom {
       }
     }
 
+    // Parse last_message safely
+    String? msgContent;
+    var rawMsg = json['last_message'];
+    if (rawMsg != null) {
+      if (rawMsg is Map) {
+        msgContent = rawMsg['text'] ?? rawMsg['content'] ?? rawMsg.toString();
+      } else {
+        msgContent = rawMsg.toString();
+      }
+    }
+
     return ChatRoom(
       id: json['id'] ?? 0,
       userName: name,
-      lastMessage: json['last_message'],
+      lastMessage: msgContent,
       lastMessageTime: json['updated_at'] ?? '',
       userAvatar: avatar,
     );

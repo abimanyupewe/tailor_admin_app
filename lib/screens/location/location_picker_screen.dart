@@ -28,19 +28,22 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
   final TextEditingController _searchController = TextEditingController();
   bool _isLoading = false;
   String _address = '';
+  bool _hasInitialLocation = false;
 
   @override
   void initState() {
     super.initState();
     _mapController = MapController();
-    // Validate initial coordinates
-    if (widget.initialLat == 0 && widget.initialLng == 0) {
+
+    // Check if valid initial coordinates are provided
+    if (widget.initialLat != 0 && widget.initialLng != 0) {
+      _currentCenter = LatLng(widget.initialLat, widget.initialLng);
+      _hasInitialLocation = true;
+      _getAddressFromLatLng(_currentCenter);
+    } else {
+      // Default fallback (Jakarta) but we will try to get real location
       _currentCenter = const LatLng(-6.200000, 106.816666);
       _getCurrentLocation();
-    } else {
-      _currentCenter = LatLng(widget.initialLat, widget.initialLng);
-      // Fetch initial address if coordinates valid
-      _getAddressFromLatLng(_currentCenter);
     }
   }
 
@@ -54,6 +57,7 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
       serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
         Get.snackbar('Error', 'Location services are disabled.');
+        setState(() => _hasInitialLocation = true); // Fallback to default
         return;
       }
 
@@ -62,25 +66,31 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
         permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.denied) {
           Get.snackbar('Error', 'Location permissions are denied');
+          setState(() => _hasInitialLocation = true); // Fallback
           return;
         }
       }
 
       if (permission == LocationPermission.deniedForever) {
         Get.snackbar('Error', 'Location permissions are permanently denied.');
+        setState(() => _hasInitialLocation = true); // Fallback
         return;
       }
 
-      Position position = await Geolocator.getCurrentPosition();
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
       final newPos = LatLng(position.latitude, position.longitude);
 
       setState(() {
         _currentCenter = newPos;
+        _hasInitialLocation = true;
       });
       _mapController.move(newPos, 15.0);
       _getAddressFromLatLng(newPos);
     } catch (e) {
       Get.snackbar('Error', 'Failed to get location: $e');
+      setState(() => _hasInitialLocation = true); // Fallback
     } finally {
       setState(() => _isLoading = false);
     }
@@ -182,167 +192,191 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
           onPressed: () => Get.back(),
         ),
       ),
-      body: Stack(
-        children: [
-          FlutterMap(
-            mapController: _mapController,
-            options: MapOptions(
-              initialCenter: _currentCenter,
-              initialZoom: 15.0,
-              onPositionChanged: (position, hasGesture) {
-                if (position.center != null) {
-                  _currentCenter = position.center!;
-                  // We don't fetch address continuously here to avoid rate limit
-                }
-              },
-              // When map stops moving (interaction ends), we could fetch address
-              onMapEvent: (event) {
-                if (event is MapEventMoveEnd) {
-                  _getAddressFromLatLng(event.camera.center);
-                }
-              },
-            ),
-            children: [
-              TileLayer(
-                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                userAgentPackageName: 'com.tailor.admin.app',
-              ),
-            ],
-          ),
-
-          // Search Bar
-          Positioned(
-            top: 16,
-            left: 20,
-            right: 20,
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 10,
-                    offset: Offset(0, 4),
-                  ),
+      body: !_hasInitialLocation
+          ? const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 16),
+                  Text("Mencari lokasi anda..."),
                 ],
               ),
-              child: TextField(
-                controller: _searchController,
-                textInputAction: TextInputAction.search,
-                onSubmitted: _searchLocation,
-                decoration: InputDecoration(
-                  hintText: 'Cari lokasi (cth: Monas, Jakarta)...',
-                  hintStyle: GoogleFonts.plusJakartaSans(fontSize: 14),
-                  prefixIcon: const Icon(Iconsax.search_normal),
-                  suffixIcon: IconButton(
-                    icon: const Icon(Icons.search),
-                    onPressed: () => _searchLocation(_searchController.text),
-                  ),
-                  border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 14,
-                  ),
-                ),
-              ),
-            ),
-          ),
-
-          // Loading Indicator
-          if (_isLoading) const Center(child: CircularProgressIndicator()),
-
-          // Fixed Center Pin
-          const Center(
-            child: Padding(
-              padding: EdgeInsets.only(bottom: 50), // Adjust for pin anchor
-              child: Icon(
-                Icons.location_on,
-                color: Color(0xFF3F51B5),
-                size: 50,
-              ),
-            ),
-          ),
-
-          // Address Preview & Confirm Button
-          Positioned(
-            bottom: 30,
-            left: 20,
-            right: 20,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
+            )
+          : Stack(
               children: [
-                // My Location Button
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: FloatingActionButton(
-                      backgroundColor: Colors.white,
-                      onPressed: _getCurrentLocation,
-                      child: const Icon(Iconsax.gps, color: Color(0xFF3F51B5)),
+                FlutterMap(
+                  mapController: _mapController,
+                  options: MapOptions(
+                    initialCenter: _currentCenter,
+                    initialZoom: 15.0,
+                    onPositionChanged: (position, hasGesture) {
+                      if (position.center != null) {
+                        _currentCenter = position.center!;
+                        // We don't fetch address continuously here to avoid rate limit
+                      }
+                    },
+                    // When map stops moving (interaction ends), we could fetch address
+                    onMapEvent: (event) {
+                      if (event is MapEventMoveEnd) {
+                        _getAddressFromLatLng(event.camera.center);
+                      }
+                    },
+                  ),
+                  children: [
+                    TileLayer(
+                      urlTemplate:
+                          'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                      userAgentPackageName: 'com.tailor.admin.app',
+                    ),
+                  ],
+                ),
+
+                // Search Bar
+                Positioned(
+                  top: 16,
+                  left: 20,
+                  right: 20,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 10,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: TextField(
+                      controller: _searchController,
+                      textInputAction: TextInputAction.search,
+                      onSubmitted: _searchLocation,
+                      decoration: InputDecoration(
+                        hintText: 'Cari lokasi (cth: Monas, Jakarta)...',
+                        hintStyle: GoogleFonts.plusJakartaSans(fontSize: 14),
+                        prefixIcon: const Icon(Iconsax.search_normal),
+                        suffixIcon: IconButton(
+                          icon: const Icon(Icons.search),
+                          onPressed: () =>
+                              _searchLocation(_searchController.text),
+                        ),
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
+                      ),
                     ),
                   ),
                 ),
 
-                // Info Card
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 15,
-                        offset: Offset(0, -2),
-                      ),
-                    ],
+                // Loading Indicator
+                if (_isLoading)
+                  const Center(child: CircularProgressIndicator()),
+
+                // Fixed Center Pin
+                const Center(
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      bottom: 50,
+                    ), // Adjust for pin anchor
+                    child: Icon(
+                      Icons.location_on,
+                      color: Color(0xFF3F51B5),
+                      size: 50,
+                    ),
                   ),
+                ),
+
+                // Address Preview & Confirm Button
+                Positioned(
+                  bottom: 30,
+                  left: 20,
+                  right: 20,
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (_address.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Iconsax.location,
-                                size: 20,
-                                color: Colors.grey,
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  _address,
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 12,
-                                    color: Colors.grey[800],
-                                  ),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
+                      // My Location Button
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: FloatingActionButton(
+                            backgroundColor: Colors.white,
+                            onPressed: _getCurrentLocation,
+                            child: const Icon(
+                              Iconsax.gps,
+                              color: Color(0xFF3F51B5),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // Info Card
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Colors.black12,
+                              blurRadius: 15,
+                              offset: Offset(0, -2),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            if (_address.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: Row(
+                                  children: [
+                                    const Icon(
+                                      Iconsax.location,
+                                      size: 20,
+                                      color: Colors.grey,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        _address,
+                                        style: GoogleFonts.plusJakartaSans(
+                                          fontSize: 12,
+                                          color: Colors.grey[800],
+                                        ),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                            ],
-                          ),
-                        ),
-                      ElevatedButton(
-                        onPressed: _onConfirm,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF3F51B5),
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: Text(
-                          'Konfirmasi Lokasi Ini',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
+                            ElevatedButton(
+                              onPressed: _onConfirm,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF3F51B5),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: Text(
+                                'Konfirmasi Lokasi Ini',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
@@ -350,9 +384,6 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                 ),
               ],
             ),
-          ),
-        ],
-      ),
     );
   }
 }

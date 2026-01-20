@@ -82,8 +82,10 @@ class ApiService extends GetxService {
           } else if (errorBody.containsKey('message')) {
             errorMessage = errorBody['message'];
           } else {
-            // Extract first value from map if no specific key
-            errorMessage = errorBody.values.first.toString();
+            // Join all errors with their keys
+            errorMessage = errorBody.entries
+                .map((e) => '${e.key}: ${e.value}')
+                .join('\n');
           }
         } else {
           errorMessage = errorBody.toString();
@@ -111,7 +113,10 @@ class ApiService extends GetxService {
   Future<dynamic> login(String username, String password) async {
     final response = await http.post(
       Uri.parse('$baseUrl/api/users/auth/login/'),
-      headers: _headers,
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
       body: json.encode({'username': username, 'password': password}),
     );
     final data = await _handleResponse(response);

@@ -34,11 +34,23 @@ class ServiceController extends GetxController {
   Future<void> addService(Map<String, dynamic> data) async {
     try {
       await _apiService.addService(data);
-      Get.snackbar('Sukses', 'Layanan berhasil ditambahkan');
+      Get.back(); // Close dialog first
+      Get.snackbar(
+        'Sukses',
+        'Layanan berhasil ditambahkan',
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(16),
+      );
       fetchServices();
-      Get.back(); // Close dialog/screen
     } catch (e) {
-      Get.snackbar('Error', 'Gagal menambah layanan: $e');
+      Get.snackbar(
+        'Error',
+        'Gagal menambah layanan: $e',
+        backgroundColor: Colors.red[100],
+        colorText: Colors.red,
+      );
     }
   }
 
