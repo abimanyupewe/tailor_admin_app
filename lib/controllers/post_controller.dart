@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:tailor_admin_app/data/api_service.dart';
 import 'package:tailor_admin_app/models/post_model.dart';
@@ -48,7 +49,14 @@ class PostController extends GetxController {
         );
       }
 
-      Get.snackbar('Sukses', 'Postingan berhasil ditambahkan');
+      Get.snackbar(
+        'Sukses',
+        'Postingan berhasil ditambahkan',
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(16),
+      );
       fetchPosts();
       Get.back();
     } catch (e) {

@@ -7,7 +7,8 @@ import 'package:tailor_admin_app/screens/services/service_list_screen.dart';
 import 'package:tailor_admin_app/screens/portfolio/portfolio_screen.dart';
 import 'package:tailor_admin_app/screens/location/manage_location_screen.dart';
 import 'package:tailor_admin_app/screens/profile/edit_profile_screen.dart';
-// Hapus import dart:io jika tidak dipakai di UI ini, 
+import 'package:tailor_admin_app/data/api_service.dart';
+// Hapus import dart:io jika tidak dipakai di UI ini,
 // tapi biarkan jika logic controller membutuhkannya.
 
 class ProfileScreen extends StatelessWidget {
@@ -118,23 +119,30 @@ class ProfileScreen extends StatelessWidget {
                           child: CircleAvatar(
                             radius: 48,
                             backgroundColor: Colors.white,
-                            child: Text(
-                              user.username.isNotEmpty
-                                  ? user.username[0].toUpperCase()
-                                  : '?',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 36,
-                                fontWeight: FontWeight.bold,
-                                color: primaryBlue,
-                              ),
-                            ),
+                            backgroundImage: user.avatar != null
+                                ? NetworkImage(Get.find<ApiService>().getImageUrl(user.avatar))
+                                : null,
+                            child: user.avatar == null
+                                ? Text(
+                                    user.username.isNotEmpty
+                                        ? user.username[0].toUpperCase()
+                                        : '?',
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 36,
+                                      fontWeight: FontWeight.bold,
+                                      color: primaryBlue,
+                                    ),
+                                  )
+                                : null,
                           ),
                         ),
                         const SizedBox(height: 12),
                         // Role Badge (Glassmorphism)
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 6),
+                            horizontal: 16,
+                            vertical: 6,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.2),
                             borderRadius: BorderRadius.circular(20),
@@ -157,7 +165,9 @@ class ProfileScreen extends StatelessWidget {
                             fontSize: 14,
                           ),
                         ),
-                        const SizedBox(height: 30), // Spasi agar tidak tertutup title
+                        const SizedBox(
+                          height: 30,
+                        ), // Spasi agar tidak tertutup title
                       ],
                     ),
                   ],
@@ -173,7 +183,7 @@ class ProfileScreen extends StatelessWidget {
                   // Section Title
                   _buildSectionHeader("Manajemen Toko"),
                   const SizedBox(height: 12),
-                  
+
                   // Menu Items dengan Animasi Masuk
                   _SlideInAnimation(
                     delay: 100,
@@ -220,9 +230,9 @@ class ProfileScreen extends StatelessWidget {
                       onTap: () => Get.to(() => const EditProfileScreen()),
                     ),
                   ),
-                  
+
                   const SizedBox(height: 12),
-                  
+
                   _SlideInAnimation(
                     delay: 500,
                     child: _buildInteractiveCard(
@@ -234,7 +244,7 @@ class ProfileScreen extends StatelessWidget {
                       onTap: controller.logout,
                     ),
                   ),
-                  
+
                   // Extra space di bawah agar scroll lebih lega
                   const SizedBox(height: 50),
                 ]),
@@ -303,11 +313,7 @@ class ProfileScreen extends StatelessWidget {
                     color: color.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(15),
                   ),
-                  child: Icon(
-                    icon,
-                    color: color,
-                    size: 24,
-                  ),
+                  child: Icon(icon, color: color, size: 24),
                 ),
                 const SizedBox(width: 16),
                 // Texts
@@ -320,7 +326,9 @@ class ProfileScreen extends StatelessWidget {
                         style: GoogleFonts.plusJakartaSans(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
-                          color: isWarning ? Colors.red : const Color(0xFF1E293B),
+                          color: isWarning
+                              ? Colors.red
+                              : const Color(0xFF1E293B),
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -378,15 +386,9 @@ class _SlideInAnimationState extends State<_SlideInAnimation>
     _offsetAnimation = Tween<Offset>(
       begin: const Offset(0, 0.3), // Mulai sedikit dari bawah
       end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOutQuint,
-    ));
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutQuint));
 
-    _fadeAnimation = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeIn,
-    );
+    _fadeAnimation = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
 
     // Jalankan animasi setelah delay
     Future.delayed(Duration(milliseconds: widget.delay), () {
@@ -404,10 +406,7 @@ class _SlideInAnimationState extends State<_SlideInAnimation>
   Widget build(BuildContext context) {
     return FadeTransition(
       opacity: _fadeAnimation,
-      child: SlideTransition(
-        position: _offsetAnimation,
-        child: widget.child,
-      ),
+      child: SlideTransition(position: _offsetAnimation, child: widget.child),
     );
   }
 }

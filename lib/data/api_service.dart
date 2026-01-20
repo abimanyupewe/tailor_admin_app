@@ -331,7 +331,7 @@ class ApiService extends GetxService {
   // --- Reviews ---
   Future<dynamic> getReviews(String tailorId) async {
     final response = await http.get(
-      Uri.parse('$baseUrl/reviews/?tailor_id=$tailorId'),
+      Uri.parse('$baseUrl/api/reviews/?tailor_id=$tailorId'),
       headers: _headers,
     );
     return _handleResponse(response);
@@ -339,7 +339,7 @@ class ApiService extends GetxService {
 
   Future<dynamic> createReview(Map<String, dynamic> data) async {
     final response = await http.post(
-      Uri.parse('$baseUrl/reviews/'),
+      Uri.parse('$baseUrl/api/reviews/'),
       headers: _headers,
       body: json.encode(data),
     );

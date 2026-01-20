@@ -125,7 +125,22 @@ class PortfolioScreen extends StatelessWidget {
                               color: Colors.red,
                               size: 18,
                             ),
-                            onPressed: () => controller.deletePost(post.id),
+                            onPressed: () {
+                              Get.defaultDialog(
+                                title: 'Hapus Postingan',
+                                middleText:
+                                    'Apakah Anda yakin ingin menghapus postingan ini?',
+                                textConfirm: 'Ya, Hapus',
+                                textCancel: 'Batal',
+                                confirmTextColor: Colors.white,
+                                buttonColor: Colors.red,
+                                cancelTextColor: Colors.black,
+                                onConfirm: () {
+                                  controller.deletePost(post.id);
+                                  Get.back(); // Close dialog
+                                },
+                              );
+                            },
                             padding: EdgeInsets.zero,
                             constraints: const BoxConstraints(),
                           ),

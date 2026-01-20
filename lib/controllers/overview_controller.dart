@@ -114,23 +114,56 @@ class OverviewController extends GetxController {
     try {
       final profile = await _apiService.getProfile();
       if (profile is Map) {
-        // Handle rating override from profile if exists
-        if (profile.containsKey('rating')) {
-          rating.value = double.tryParse(profile['rating'].toString()) ?? 0.0;
-        } else if (profile['user'] != null &&
-            profile['user'] is Map &&
-            profile['user'].containsKey('rating')) {
-          // Check inside user object just in case
-          rating.value =
-              double.tryParse(profile['user']['rating'].toString()) ?? 0.0;
-        }
-
-        // Handle Username extraction from nested user object
+        // Handle Username extraction
         if (profile.containsKey('user') && profile['user'] is Map) {
           username.value = profile['user']['username'] ?? '';
         } else if (profile.containsKey('username')) {
           username.value = profile['username'];
         }
+
+        // Try to get rating from profile first
+        double fetchedRating = 0.0;
+        if (profile.containsKey('rating')) {
+          fetchedRating = double.tryParse(profile['rating'].toString()) ?? 0.0;
+        }
+
+        // If 0, try fetching reviews to calculate it
+        if (fetchedRating == 0.0) {
+          int userId = profile['id'] ?? 0;
+          if (userId > 0) {
+            try {
+              final reviewsResponse = await _apiService.getReviews(
+                userId.toString(),
+              );
+              if (reviewsResponse is List) {
+                if (reviewsResponse.isNotEmpty) {
+                  double total = 0;
+                  for (var r in reviewsResponse) {
+                    total +=
+                        double.tryParse((r['rating'] ?? 0).toString()) ?? 0.0;
+                  }
+                  fetchedRating = total / reviewsResponse.length;
+                }
+              } else if (reviewsResponse is Map &&
+                  reviewsResponse.containsKey('results')) {
+                // Handle pagination format
+                List results = reviewsResponse['results'];
+                if (results.isNotEmpty) {
+                  double total = 0;
+                  for (var r in results) {
+                    total +=
+                        double.tryParse((r['rating'] ?? 0).toString()) ?? 0.0;
+                  }
+                  fetchedRating = total / results.length;
+                }
+              }
+            } catch (e) {
+              print('Error fetching reviews for rating: $e');
+            }
+          }
+        }
+
+        rating.value = fetchedRating;
       }
     } catch (_) {}
   }
