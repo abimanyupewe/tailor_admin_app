@@ -15,7 +15,11 @@ class ChatController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _fetchMyId();
+    _initData();
+  }
+
+  Future<void> _initData() async {
+    await _fetchMyId();
     fetchRooms();
   }
 
@@ -31,10 +35,14 @@ class ChatController extends GetxController {
     try {
       final response = await _apiService.getChatRooms();
       if (response is List) {
-        rooms.value = response.map((e) => ChatRoom.fromJson(e)).toList();
+        rooms.value = response
+            .map((e) => ChatRoom.fromJson(e, currentUserId))
+            .toList();
       } else if (response is Map && response.containsKey('results')) {
         final List results = response['results'];
-        rooms.value = results.map((e) => ChatRoom.fromJson(e)).toList();
+        rooms.value = results
+            .map((e) => ChatRoom.fromJson(e, currentUserId))
+            .toList();
       }
     } catch (e) {
       Get.snackbar('Error', 'Gagal memuat chat room: $e');
@@ -48,16 +56,21 @@ class ChatController extends GetxController {
     // isLoading.value = true;
     try {
       final response = await _apiService.getChatMessages(roomId);
+      List<ChatMessage> fetched = [];
       if (response is List) {
-        messages.value = response
+        fetched = response
             .map((e) => ChatMessage.fromJson(e, currentUserId ?? 0))
             .toList();
       } else if (response is Map && response.containsKey('results')) {
         final List results = response['results'];
-        messages.value = results
+        fetched = results
             .map((e) => ChatMessage.fromJson(e, currentUserId ?? 0))
             .toList();
       }
+
+      // Client-side sort: Oldest first (Ascending)
+      fetched.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+      messages.value = fetched;
       // Reverse messages if API returns newest first, depends on UI expectations
       // Usually chat UI builds from bottom.
     } catch (e) {
@@ -65,16 +78,36 @@ class ChatController extends GetxController {
     }
   }
 
-  Future<void> sendMessage(int roomId, String text) async {
-    if (text.trim().isEmpty) return;
+  Future<bool> sendMessage(int roomId, String text) async {
+    if (text.trim().isEmpty) return false;
     isSending.value = true;
     try {
+      print('DEBUG SEND: roomId=$roomId text=$text');
       await _apiService.sendMessage(roomId, text);
-      fetchMessages(roomId); // Refresh messages
+      print('DEBUG SEND SUCCESS');
+      await fetchMessages(roomId); // Refresh messages
+      return true;
     } catch (e) {
-      Get.snackbar('Error', 'Gagal mengirim pesan: $e');
+      print('DEBUG SEND ERROR: $e');
+      Get.defaultDialog(
+        title: 'Gagal Mengirim',
+        middleText: 'Error: $e',
+        textConfirm: 'OK',
+        confirmTextColor: Get.theme.primaryColor,
+        onConfirm: () => Get.back(),
+      );
+      return false;
     } finally {
       isSending.value = false;
+    }
+  }
+
+  Future<void> startChat(int userId) async {
+    try {
+      await _apiService.startChat(userId);
+      await fetchRooms();
+    } catch (e) {
+      Get.snackbar('Error', 'Gagal memulai chat: $e');
     }
   }
 }

@@ -328,6 +328,15 @@ class ApiService extends GetxService {
     return _handleResponse(response);
   }
 
+  // --- Maintenance ---
+  Future<dynamic> cleanupPendingOrders() async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/orders/cleanup/'),
+      headers: _headers,
+    );
+    return _handleResponse(response);
+  }
+
   // --- Reviews ---
   Future<dynamic> getReviews(String tailorId) async {
     final response = await http.get(
@@ -393,6 +402,14 @@ class ApiService extends GetxService {
   }
 
   // --- Chat ---
+  Future<dynamic> startChat(int userId) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/chat/start/$userId/'),
+      headers: _headers,
+    );
+    return _handleResponse(response);
+  }
+
   Future<dynamic> getChatRooms() async {
     final response = await http.get(
       Uri.parse('$baseUrl/api/chat/rooms/'),
@@ -403,7 +420,9 @@ class ApiService extends GetxService {
 
   Future<dynamic> getChatMessages(int roomId) async {
     final response = await http.get(
-      Uri.parse('$baseUrl/api/chat/messages/?room_id=$roomId'),
+      Uri.parse(
+        '$baseUrl/api/chat/rooms/$roomId/messages/?ordering=-created_at',
+      ),
       headers: _headers,
     );
     return _handleResponse(response);
@@ -411,9 +430,9 @@ class ApiService extends GetxService {
 
   Future<dynamic> sendMessage(int roomId, String text) async {
     final response = await http.post(
-      Uri.parse('$baseUrl/api/chat/messages/'),
+      Uri.parse('$baseUrl/api/chat/rooms/$roomId/messages/'),
       headers: _headers,
-      body: json.encode({'room_id': roomId, 'room': roomId, 'text': text}),
+      body: json.encode({'text': text}),
     );
     return _handleResponse(response);
   }

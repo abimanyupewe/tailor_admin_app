@@ -24,9 +24,25 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
   Timer? _timer;
 
   @override
+  @override
   void initState() {
     super.initState();
     controller.fetchMessages(widget.room.id);
+
+    // Auto-scroll listener
+    ever(controller.messages, (_) {
+      if (_scrollController.hasClients) {
+        // Wait for list to build
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _scrollController.animateTo(
+            _scrollController.position.maxScrollExtent,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOut,
+          );
+        });
+      }
+    });
+
     // Poll every 5 seconds
     _timer = Timer.periodic(const Duration(seconds: 5), (timer) {
       if (mounted) {
@@ -48,6 +64,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F6FA),
       appBar: AppBar(
+        // ... unchanged ...
         backgroundColor: Colors.white,
         elevation: 1,
         leading: const BackButton(color: Colors.black),
@@ -84,16 +101,23 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
         children: [
           Expanded(
             child: Obx(() {
-              // Simple list builder
-              // Inverting (reverse: true) is common for chats, but depends on API order.
-              // Assuming API returns oldest first? Or newest first?
-              // If newest first, we use reverse: true. If oldest first, reverse: false and scroll to bottom.
-              // Let's assume typical list behavior for now (Oldest at top).
               final msgs = controller.messages;
-
               if (msgs.isEmpty) {
                 return const Center(child: Text("Belum ada pesan."));
               }
+
+              // Initial scroll to bottom on first load
+              // We use a small delay or post frame callback in builder?
+              // Actually 'ever' covers updates, but initial load might need a trigger
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (_scrollController.hasClients &&
+                    _scrollController.offset == 0 &&
+                    msgs.isNotEmpty) {
+                  _scrollController.jumpTo(
+                    _scrollController.position.maxScrollExtent,
+                  );
+                }
+              });
 
               return ListView.builder(
                 controller: _scrollController,
@@ -149,9 +173,9 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
             ),
             const SizedBox(height: 4),
             Text(
-              DateFormat(
-                'HH:mm',
-              ).format(DateTime.tryParse(msg.createdAt) ?? DateTime.now()),
+              DateFormat('HH:mm').format(
+                (DateTime.tryParse(msg.createdAt) ?? DateTime.now()).toLocal(),
+              ),
               style: GoogleFonts.plusJakartaSans(
                 color: isMe ? Colors.white70 : Colors.grey,
                 fontSize: 10,
@@ -203,13 +227,15 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                         color: Colors.white,
                         size: 20,
                       ),
-                      onPressed: () {
+                      onPressed: () async {
                         if (_msgController.text.trim().isNotEmpty) {
-                          controller.sendMessage(
+                          final success = await controller.sendMessage(
                             widget.room.id,
                             _msgController.text,
                           );
-                          _msgController.clear();
+                          if (success) {
+                            _msgController.clear();
+                          }
                         }
                       },
                     ),
