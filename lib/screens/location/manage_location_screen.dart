@@ -26,19 +26,20 @@ class ManageLocationScreen extends StatelessWidget {
     });
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6FA),
+      backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
         title: Text(
           'Kelola Lokasi Toko',
           style: GoogleFonts.plusJakartaSans(
             fontWeight: FontWeight.bold,
-            color: Colors.black,
+            color: const Color(0xFF1E293B),
+            fontSize: 18,
           ),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(0xFFF8FAFC),
         elevation: 0,
         centerTitle: false,
-        iconTheme: const IconThemeData(color: Colors.black),
+        iconTheme: const IconThemeData(color: Color(0xFF1E293B)),
       ),
       body: Obx(() {
         if (controller.isLoading.value) {
@@ -54,64 +55,73 @@ class ManageLocationScreen extends StatelessWidget {
         }
 
         return SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Container(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.05),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
                 ),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    TextField(
-                      controller: addressController,
-                      decoration: const InputDecoration(
-                        labelText: 'Alamat Lengkap',
-                        border: OutlineInputBorder(),
+                    Text(
+                      'Detail Lokasi',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF1E293B),
                       ),
+                    ),
+                    const SizedBox(height: 24),
+                    _buildModernTextField(
+                      controller: addressController,
+                      label: 'Alamat Lengkap',
+                      icon: Iconsax.location,
                       maxLines: 3,
                     ),
                     const SizedBox(height: 16),
                     Row(
                       children: [
                         Expanded(
-                          child: TextField(
+                          child: _buildModernTextField(
                             controller: latController,
-                            decoration: const InputDecoration(
-                              labelText: 'Latitude',
-                              border: OutlineInputBorder(),
-                            ),
+                            label: 'Latitude',
+                            icon: Iconsax.global,
                             keyboardType: TextInputType.number,
                           ),
                         ),
                         const SizedBox(width: 16),
                         Expanded(
-                          child: TextField(
+                          child: _buildModernTextField(
                             controller: longController,
-                            decoration: const InputDecoration(
-                              labelText: 'Longitude',
-                              border: OutlineInputBorder(),
-                            ),
+                            label: 'Longitude',
+                            icon: Iconsax.global,
                             keyboardType: TextInputType.number,
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 24),
                     SizedBox(
                       width: double.infinity,
                       child: OutlinedButton.icon(
                         onPressed: () async {
-                          // Get current values or default
                           double currentLat =
                               double.tryParse(latController.text) ?? 0.0;
                           double currentLng =
                               double.tryParse(longController.text) ?? 0.0;
 
-                          // Navigate to picker
                           final result = await Get.to(
                             () => LocationPickerScreen(
                               initialLat: currentLat,
@@ -119,7 +129,6 @@ class ManageLocationScreen extends StatelessWidget {
                             ),
                           );
 
-                          // Handle result
                           if (result != null) {
                             if (result is Map) {
                               final latlng = result['latlng'] as LatLng;
@@ -129,49 +138,26 @@ class ManageLocationScreen extends StatelessWidget {
                               longController.text = latlng.longitude.toString();
                               addressController.text = address;
                             } else if (result is LatLng) {
-                              // Fallback for backward compatibility
                               latController.text = result.latitude.toString();
                               longController.text = result.longitude.toString();
                             }
                           }
                         },
-                        icon: const Icon(Iconsax.map),
+                        icon: const Icon(Iconsax.map, size: 20),
                         label: Text(
                           'Pilih Lewat Peta',
-                          style: GoogleFonts.plusJakartaSans(),
+                          style: GoogleFonts.plusJakartaSans(
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                         style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          side: BorderSide(
+                            color: const Color(0xFF4F46E5).withOpacity(0.5),
                           ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          final lat =
-                              double.tryParse(latController.text) ?? 0.0;
-                          final lon =
-                              double.tryParse(longController.text) ?? 0.0;
-                          final addr = addressController.text;
-                          controller.updateLocation(lat, lon, addr);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF3F51B5),
+                          foregroundColor: const Color(0xFF4F46E5),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: Text(
-                          'Simpan Lokasi',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
                           ),
                         ),
                       ),
@@ -179,16 +165,116 @@ class ManageLocationScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: 20),
-              const Text(
-                'Tip: Anda bisa mendapatkan Latitude dan Longitude dari Google Maps\natau gunakan "Pilih Lewat Peta".',
-                style: TextStyle(color: Colors.grey),
-                textAlign: TextAlign.center,
+              const SizedBox(height: 32),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    final lat = double.tryParse(latController.text) ?? 0.0;
+                    final lon = double.tryParse(longController.text) ?? 0.0;
+                    final addr = addressController.text;
+                    controller.updateLocation(lat, lon, addr);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF4F46E5),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    shadowColor: const Color(0xFF4F46E5).withOpacity(0.4),
+                  ),
+                  child: Text(
+                    'Simpan Lokasi',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEFF6FF),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFFDBEAFE)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Iconsax.info_circle,
+                      color: Color(0xFF3B82F6),
+                      size: 20,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Tip: Gunakan fitur "Pilih Lewat Peta" untuk akurasi lokasi yang lebih baik.',
+                        style: GoogleFonts.plusJakartaSans(
+                          color: const Color(0xFF1E3A8A),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
         );
       }),
+    );
+  }
+
+  Widget _buildModernTextField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    TextInputType keyboardType = TextInputType.text,
+    int maxLines = 1,
+  }) {
+    return TextField(
+      controller: controller,
+      keyboardType: keyboardType,
+      maxLines: maxLines,
+      style: GoogleFonts.plusJakartaSans(
+        color: const Color(0xFF1E293B),
+        fontWeight: FontWeight.w500,
+      ),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: GoogleFonts.plusJakartaSans(color: Colors.grey[500]),
+        filled: true,
+        fillColor: const Color(
+          0xFFF8FAFC,
+        ), // F8FAFC matches the background, maybe use F1F5F9 for input?
+        // Let's use F1F5F9 to distinguish from white card
+        prefixIcon: Padding(
+          padding: const EdgeInsets.only(bottom: 0),
+          child: Icon(icon, color: Colors.grey[400], size: 20),
+        ),
+        alignLabelWithHint: true,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF4F46E5), width: 1.5),
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
+      ),
     );
   }
 }
