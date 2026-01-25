@@ -5,6 +5,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:tailor_admin_app/bindings/initial_binding.dart';
 import 'package:tailor_admin_app/routes/app_routes.dart';
 import 'package:tailor_admin_app/constants/app_colors.dart';
+import 'package:tailor_admin_app/screens/onboarding_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,6 +34,7 @@ class MyApp extends StatelessWidget {
       initialBinding: InitialBinding(),
       initialRoute: AppRoutes.splash,
       getPages: AppRoutes.pages,
+      // home: const OnboardingScreen(),
     );
   }
 }

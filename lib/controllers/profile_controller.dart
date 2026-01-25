@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:tailor_admin_app/data/api_service.dart';
 import 'package:tailor_admin_app/models/user_model.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:tailor_admin_app/routes/app_routes.dart';
 
 class ProfileController extends GetxController {
   final ApiService _apiService = Get.find<ApiService>();
@@ -69,7 +70,12 @@ class ProfileController extends GetxController {
   }
 
   Future<void> logout() async {
-    await _apiService.logout();
-    Get.offAllNamed('/login');
+    try {
+      await _apiService.logout();
+    } catch (e) {
+      print('Logout Error: $e');
+    } finally {
+      Get.offAllNamed(AppRoutes.onboarding);
+    }
   }
 }
