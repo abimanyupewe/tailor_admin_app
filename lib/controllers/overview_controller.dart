@@ -11,6 +11,8 @@ class OverviewController extends GetxController {
   final totalViews =
       0.obs; // Example metric if available, otherwise just what API returns
   final activeOrders = 0.obs;
+  final pendingOrders = 0.obs;
+  final recentOrders = <dynamic>[].obs;
   final rating = 0.0.obs;
   final username = ''.obs;
 
@@ -28,7 +30,6 @@ class OverviewController extends GetxController {
     isLoading.value = true;
     try {
       // Fetch actual orders list to calculate fields manually
-      // Loop through pagination to get ALL orders for accurate stats
       List allOrders = [];
       String? nextUrl;
 
@@ -39,18 +40,13 @@ class OverviewController extends GetxController {
         allOrders.addAll(response['results']);
         nextUrl = response['next'];
 
-        // If "count" exists, we can use it for Total Orders directly
         if (response.containsKey('count')) {
           totalOrders.value = response['count'];
         }
 
-        // Loop to fetch remaining pages for Revenue/Active calc
+        // Loop to fetch remaining pages for accurate Revenue/Active calc
         while (nextUrl != null) {
           try {
-            // Use helper to fetch by direct URL
-            // Note: ApiService needs a helper or we manually call http?
-            // Let's assume we added fetchByUrl or we hack it.
-            // Since I added fetchByUrl a moment ago, let's use it.
             var nextResponse = await _apiService.fetchByUrl(nextUrl);
             if (nextResponse is Map && nextResponse.containsKey('results')) {
               allOrders.addAll(nextResponse['results']);
@@ -68,28 +64,42 @@ class OverviewController extends GetxController {
         totalOrders.value = allOrders.length;
       }
 
-      // Calculate Revenue & Active from ALL orders
       if (allOrders.isNotEmpty) {
-        // If count was set from pagination, don't overwrite it with local list length unless necessary
-        // Actually local list length is safer if we fetched all.
         if (totalOrders.value == 0) totalOrders.value = allOrders.length;
 
         double tRevenue = 0.0;
         int tActive = 0;
+        int tPending = 0;
 
+        // Reset lists
+        recentOrders.clear();
+
+        // 1. Sort by date (descending) just in case
+        // Assuming 'created_at' exists, otherwise rely on API order
+        // allOrders.sort((a, b) => b['created_at'].compareTo(a['created_at']));
+        // (API usually returns sorted, skip explicit sort for performance unless needed)
+
+        // 2. Get Recent Orders (Top 3)
+        // Check if list is not empty before taking
+        final recentCount = allOrders.length > 3 ? 3 : allOrders.length;
+        recentOrders.addAll(allOrders.take(recentCount));
+
+        // 3. Calculate Stats
         for (var item in allOrders) {
           String status = (item['status'] ?? '').toString().toUpperCase();
           double price =
               double.tryParse((item['total_price'] ?? '0').toString()) ?? 0.0;
 
-          // Active orders: Pending, Accepted, In_Progress
           if (status == 'PENDING' ||
               status == 'ACCEPTED' ||
               status == 'IN_PROGRESS') {
             tActive++;
           }
 
-          // Revenue: Only 'COMPLETED' (Assumed Paid)
+          if (status == 'PENDING') {
+            tPending++;
+          }
+
           if (status == 'COMPLETED') {
             tRevenue += price;
           }
@@ -97,11 +107,13 @@ class OverviewController extends GetxController {
 
         totalRevenue.value = tRevenue;
         activeOrders.value = tActive;
+        pendingOrders.value = tPending;
       } else {
-        // Reset if empty
         totalOrders.value = 0;
         totalRevenue.value = 0.0;
         activeOrders.value = 0;
+        pendingOrders.value = 0;
+        recentOrders.clear();
       }
     } catch (e) {
       Get.snackbar('Error', 'Gagal memuat statistik: $e');

@@ -3,8 +3,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:tailor_admin_app/controllers/profile_controller.dart';
-import 'package:tailor_admin_app/screens/services/service_list_screen.dart';
-import 'package:tailor_admin_app/screens/portfolio/portfolio_screen.dart';
+
 import 'package:tailor_admin_app/screens/location/manage_location_screen.dart';
 import 'package:tailor_admin_app/screens/profile/edit_profile_screen.dart';
 import 'package:tailor_admin_app/data/api_service.dart';
@@ -192,26 +191,6 @@ class ProfileScreen extends StatelessWidget {
                     const SizedBox(height: 12),
 
                     // Menu Items dengan Animasi Masuk
-                    _SlideInAnimation(
-                      delay: 100,
-                      child: _buildInteractiveCard(
-                        icon: Iconsax.scissor,
-                        title: 'Kelola Layanan',
-                        subtitle: 'Daftar harga & jenis jahitan',
-                        color: Colors.blue,
-                        onTap: () => Get.to(() => const ServiceListScreen()),
-                      ),
-                    ),
-                    _SlideInAnimation(
-                      delay: 200,
-                      child: _buildInteractiveCard(
-                        icon: Iconsax.gallery,
-                        title: 'Portofolio',
-                        subtitle: 'Update hasil karya terbaru',
-                        color: Colors.orange,
-                        onTap: () => Get.to(() => const PortfolioScreen()),
-                      ),
-                    ),
                     _SlideInAnimation(
                       delay: 300,
                       child: _buildInteractiveCard(
