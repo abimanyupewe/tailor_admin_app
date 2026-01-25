@@ -310,6 +310,14 @@ class ApiService extends GetxService {
     return _handleResponse(response);
   }
 
+  Future<dynamic> getOrderById(int id) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/orders/$id/'),
+      headers: _headers,
+    );
+    return _handleResponse(response);
+  }
+
   Future<dynamic> createOrder(Map<String, dynamic> data) async {
     final response = await http.post(
       Uri.parse('$baseUrl/api/orders/'),

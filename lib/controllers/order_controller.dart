@@ -46,4 +46,19 @@ class OrderController extends GetxController {
       isLoading.value = false;
     }
   }
+
+  final Rx<OrderModel?> selectedOrder = Rx<OrderModel?>(null);
+
+  Future<void> fetchOrderDetail(int id) async {
+    // Optional: set loading state specifically for detail if needed, or use main isLoading
+    // For now, let's just fetch quietly or show dialog loader in UI
+    try {
+      final response = await _apiService.getOrderById(id);
+      if (response is Map<String, dynamic>) {
+        selectedOrder.value = OrderModel.fromJson(response);
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Gagal memuat detail pesanan: $e');
+    }
+  }
 }
