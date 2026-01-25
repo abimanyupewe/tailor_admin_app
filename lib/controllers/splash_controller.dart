@@ -13,7 +13,7 @@ class SplashController extends GetxController {
 
   Future<void> _checkAuth() async {
     // Wait for a moment to show splash screen (optional, for UX)
-    await Future.delayed(const Duration(seconds: 2));
+    await Future.delayed(const Duration(seconds: 4));
 
     // Check if token exists
     // ApiService loads token in onInit, but it's async void.

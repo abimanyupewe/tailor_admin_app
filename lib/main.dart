@@ -3,8 +3,8 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:tailor_admin_app/bindings/initial_binding.dart';
-// import 'package:tailor_admin_app/bindings/initial_binding.dart';
 import 'package:tailor_admin_app/routes/app_routes.dart';
+import 'package:tailor_admin_app/constants/app_colors.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF3F51B5)),
+        colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary),
         textTheme: GoogleFonts.plusJakartaSansTextTheme(),
       ),
       initialBinding: InitialBinding(),
