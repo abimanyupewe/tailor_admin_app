@@ -40,77 +40,81 @@ class OrderListScreen extends StatelessWidget {
           return const Center(child: Text('No orders found'));
         }
 
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              CustomDataTable(
-                columns: const [
-                  DataColumn(label: Text('ID')),
-                  DataColumn(label: Text('User')),
-                  DataColumn(label: Text('Total')),
-                  DataColumn(label: Text('Status')),
-                  DataColumn(label: Text('Date')),
-                ],
-                rows: controller.orders.map((order) {
-                  return DataRow(
-                    cells: [
-                      DataCell(Text('#${order.id}')),
-                      DataCell(Text(order.userName)),
-                      DataCell(
-                        Text('\$${order.totalPrice.toStringAsFixed(2)}'),
-                      ),
-                      DataCell(
-                        InkWell(
-                          onTap: () {
-                            _showStatusDialog(
-                              context,
-                              controller,
-                              order.id,
-                              order.status,
-                            );
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: _getStatusColor(
+        return RefreshIndicator(
+          onRefresh: controller.fetchOrders,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                CustomDataTable(
+                  columns: const [
+                    DataColumn(label: Text('ID')),
+                    DataColumn(label: Text('User')),
+                    DataColumn(label: Text('Total')),
+                    DataColumn(label: Text('Status')),
+                    DataColumn(label: Text('Date')),
+                  ],
+                  rows: controller.orders.map((order) {
+                    return DataRow(
+                      cells: [
+                        DataCell(Text('#${order.id}')),
+                        DataCell(Text(order.userName)),
+                        DataCell(
+                          Text('\$${order.totalPrice.toStringAsFixed(2)}'),
+                        ),
+                        DataCell(
+                          InkWell(
+                            onTap: () {
+                              _showStatusDialog(
+                                context,
+                                controller,
+                                order.id,
                                 order.status,
-                              ).withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
+                              );
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: _getStatusColor(
                                   order.status,
-                                  style: TextStyle(
-                                    color: _getStatusColor(order.status),
-                                    fontWeight: FontWeight.bold,
+                                ).withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    order.status,
+                                    style: TextStyle(
+                                      color: _getStatusColor(order.status),
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(width: 4),
-                                Icon(
-                                  Icons.edit,
-                                  size: 14,
-                                  color: _getStatusColor(order.status),
-                                ),
-                              ],
+                                  const SizedBox(width: 4),
+                                  Icon(
+                                    Icons.edit,
+                                    size: 14,
+                                    color: _getStatusColor(order.status),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      DataCell(
-                        Text(order.createdAt.split('T').first),
-                      ), // Simple date format
-                    ],
-                  );
-                }).toList(),
-              ),
-            ],
+                        DataCell(
+                          Text(order.createdAt.split('T').first),
+                        ), // Simple date format
+                      ],
+                    );
+                  }).toList(),
+                ),
+              ],
+            ),
           ),
         );
       }),

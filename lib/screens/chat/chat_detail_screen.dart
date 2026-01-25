@@ -119,14 +119,20 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                 }
               });
 
-              return ListView.builder(
-                controller: _scrollController,
-                padding: const EdgeInsets.all(16),
-                itemCount: msgs.length,
-                itemBuilder: (context, index) {
-                  final msg = msgs[index];
-                  return _buildMessage(msg);
+              return RefreshIndicator(
+                onRefresh: () async {
+                  await controller.fetchMessages(widget.room.id);
                 },
+                child: ListView.builder(
+                  controller: _scrollController,
+                  padding: const EdgeInsets.all(16),
+                  itemCount: msgs.length,
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  itemBuilder: (context, index) {
+                    final msg = msgs[index];
+                    return _buildMessage(msg);
+                  },
+                ),
               );
             }),
           ),

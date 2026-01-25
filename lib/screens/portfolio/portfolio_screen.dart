@@ -58,100 +58,104 @@ class PortfolioScreen extends StatelessWidget {
           );
         }
 
-        return GridView.builder(
-          padding: const EdgeInsets.all(20),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
-            childAspectRatio: 0.8,
-          ),
-          itemCount: controller.posts.length,
-          itemBuilder: (context, index) {
-            final post = controller.posts[index];
-            return Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Expanded(
-                    child: ClipRRect(
-                      borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(12),
-                      ),
-                      child: post.image != null
-                          ? Image.network(
-                              apiService.getImageUrl(post.image),
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) =>
-                                  const Icon(Icons.image_not_supported),
-                            )
-                          : Container(
-                              color: Colors.grey[200],
-                              child: const Icon(
-                                Icons.image,
-                                color: Colors.grey,
-                              ),
-                            ),
+        return RefreshIndicator(
+          onRefresh: controller.fetchPosts,
+          child: GridView.builder(
+            padding: const EdgeInsets.all(20),
+            physics: const AlwaysScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+              childAspectRatio: 0.8,
+            ),
+            itemCount: controller.posts.length,
+            itemBuilder: (context, index) {
+              final post = controller.posts[index];
+              return Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.1),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (post.caption != null)
-                          Text(
-                            post.caption!,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.plusJakartaSans(fontSize: 12),
-                          ),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: IconButton(
-                            icon: const Icon(
-                              Iconsax.trash,
-                              color: Colors.red,
-                              size: 18,
-                            ),
-                            onPressed: () {
-                              Get.defaultDialog(
-                                title: 'Hapus Postingan',
-                                middleText:
-                                    'Apakah Anda yakin ingin menghapus postingan ini?',
-                                textConfirm: 'Ya, Hapus',
-                                textCancel: 'Batal',
-                                confirmTextColor: Colors.white,
-                                buttonColor: Colors.red,
-                                cancelTextColor: Colors.black,
-                                onConfirm: () {
-                                  controller.deletePost(post.id);
-                                  Get.back(); // Close dialog
-                                },
-                              );
-                            },
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(),
-                          ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                      child: ClipRRect(
+                        borderRadius: const BorderRadius.vertical(
+                          top: Radius.circular(12),
                         ),
-                      ],
+                        child: post.image != null
+                            ? Image.network(
+                                apiService.getImageUrl(post.image),
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    const Icon(Icons.image_not_supported),
+                              )
+                            : Container(
+                                color: Colors.grey[200],
+                                child: const Icon(
+                                  Icons.image,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            );
-          },
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (post.caption != null)
+                            Text(
+                              post.caption!,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.plusJakartaSans(fontSize: 12),
+                            ),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: IconButton(
+                              icon: const Icon(
+                                Iconsax.trash,
+                                color: Colors.red,
+                                size: 18,
+                              ),
+                              onPressed: () {
+                                Get.defaultDialog(
+                                  title: 'Hapus Postingan',
+                                  middleText:
+                                      'Apakah Anda yakin ingin menghapus postingan ini?',
+                                  textConfirm: 'Ya, Hapus',
+                                  textCancel: 'Batal',
+                                  confirmTextColor: Colors.white,
+                                  buttonColor: Colors.red,
+                                  cancelTextColor: Colors.black,
+                                  onConfirm: () {
+                                    controller.deletePost(post.id);
+                                    Get.back(); // Close dialog
+                                  },
+                                );
+                              },
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
         );
       }),
     );

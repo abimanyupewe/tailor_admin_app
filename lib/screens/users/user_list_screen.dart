@@ -40,58 +40,62 @@ class UserListScreen extends StatelessWidget {
           return const Center(child: Text('No users found'));
         }
 
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              CustomDataTable(
-                columns: const [
-                  DataColumn(label: Text('ID')),
-                  DataColumn(label: Text('Username')),
-                  DataColumn(label: Text('Email')),
-                  DataColumn(label: Text('Role')),
-                  DataColumn(label: Text('Status')),
-                ],
-                rows: controller.users.map((user) {
-                  return DataRow(
-                    cells: [
-                      DataCell(Text('#${user.id}')),
-                      DataCell(Text(user.username)),
-                      DataCell(Text(user.email)),
-                      DataCell(
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.blue.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            user.role,
-                            style: const TextStyle(
-                              color: Colors.blue,
-                              fontWeight: FontWeight.bold,
+        return RefreshIndicator(
+          onRefresh: controller.fetchUsers,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                CustomDataTable(
+                  columns: const [
+                    DataColumn(label: Text('ID')),
+                    DataColumn(label: Text('Username')),
+                    DataColumn(label: Text('Email')),
+                    DataColumn(label: Text('Role')),
+                    DataColumn(label: Text('Status')),
+                  ],
+                  rows: controller.users.map((user) {
+                    return DataRow(
+                      cells: [
+                        DataCell(Text('#${user.id}')),
+                        DataCell(Text(user.username)),
+                        DataCell(Text(user.email)),
+                        DataCell(
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.blue.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              user.role,
+                              style: const TextStyle(
+                                color: Colors.blue,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      DataCell(
-                        Text(
-                          user.isActive ? 'Active' : 'Inactive',
-                          style: TextStyle(
-                            color: user.isActive ? Colors.green : Colors.red,
-                            fontWeight: FontWeight.w500,
+                        DataCell(
+                          Text(
+                            user.isActive ? 'Active' : 'Inactive',
+                            style: TextStyle(
+                              color: user.isActive ? Colors.green : Colors.red,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  );
-                }).toList(),
-              ),
-            ],
+                      ],
+                    );
+                  }).toList(),
+                ),
+              ],
+            ),
           ),
         );
       }),

@@ -36,221 +36,229 @@ class ProfileScreen extends StatelessWidget {
           return const Center(child: Text("Data user tidak ditemukan"));
         }
 
-        return CustomScrollView(
-          physics: const BouncingScrollPhysics(), // Efek membal (iOS style)
-          slivers: [
-            // --- 1. INTERACTIVE HEADER (SLIVER) ---
-            SliverAppBar(
-              expandedHeight: 280.0,
-              floating: false,
-              pinned: true, // Header tetap nempel di atas saat scroll
-              backgroundColor: primaryBlue,
-              elevation: 0,
-              stretch: true, // Bisa ditarik (zoom effect)
-              flexibleSpace: FlexibleSpaceBar(
-                stretchModes: const [StretchMode.zoomBackground],
-                title: Text(
-                  user.username,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    color: Colors.white,
+        return RefreshIndicator(
+          onRefresh: controller.fetchProfile,
+          child: CustomScrollView(
+            physics:
+                const AlwaysScrollableScrollPhysics(), // Efek membal (iOS style)
+            slivers: [
+              // --- 1. INTERACTIVE HEADER (SLIVER) ---
+              SliverAppBar(
+                expandedHeight: 280.0,
+                floating: false,
+                pinned: true, // Header tetap nempel di atas saat scroll
+                backgroundColor: primaryBlue,
+                elevation: 0,
+                stretch: true, // Bisa ditarik (zoom effect)
+                flexibleSpace: FlexibleSpaceBar(
+                  stretchModes: const [StretchMode.zoomBackground],
+                  title: Text(
+                    user.username,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: Colors.white,
+                    ),
                   ),
-                ),
-                centerTitle: true,
-                // Saat di-scroll ke atas, ini yang akan tersembunyi
-                background: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    // Gradient Background
-                    Container(
-                      decoration: const BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topRight,
-                          end: Alignment.bottomLeft,
-                          colors: [primaryBlue, Color(0xFF312E81)],
+                  centerTitle: true,
+                  // Saat di-scroll ke atas, ini yang akan tersembunyi
+                  background: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      // Gradient Background
+                      Container(
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topRight,
+                            end: Alignment.bottomLeft,
+                            colors: [primaryBlue, Color(0xFF312E81)],
+                          ),
                         ),
                       ),
-                    ),
-                    // Dekorasi Lingkaran Abstrak (Agar estetik)
-                    Positioned(
-                      top: -50,
-                      right: -50,
-                      child: Container(
-                        width: 200,
-                        height: 200,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.05),
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      bottom: 50,
-                      left: -30,
-                      child: Container(
-                        width: 150,
-                        height: 150,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.05),
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                    ),
-                    // Konten Profil Utama
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const SizedBox(height: 20),
-                        // Avatar dengan Glow Effect
-                        Container(
-                          padding: const EdgeInsets.all(4),
+                      // Dekorasi Lingkaran Abstrak (Agar estetik)
+                      Positioned(
+                        top: -50,
+                        right: -50,
+                        child: Container(
+                          width: 200,
+                          height: 200,
                           decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.05),
                             shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white, width: 2),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.2),
-                                blurRadius: 15,
-                                offset: const Offset(0, 8),
-                              ),
-                            ],
-                          ),
-                          child: CircleAvatar(
-                            radius: 48,
-                            backgroundColor: Colors.white,
-                            backgroundImage: user.avatar != null
-                                ? NetworkImage(Get.find<ApiService>().getImageUrl(user.avatar))
-                                : null,
-                            child: user.avatar == null
-                                ? Text(
-                                    user.username.isNotEmpty
-                                        ? user.username[0].toUpperCase()
-                                        : '?',
-                                    style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 36,
-                                      fontWeight: FontWeight.bold,
-                                      color: primaryBlue,
-                                    ),
-                                  )
-                                : null,
                           ),
                         ),
-                        const SizedBox(height: 12),
-                        // Role Badge (Glassmorphism)
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 6,
-                          ),
+                      ),
+                      Positioned(
+                        bottom: 50,
+                        left: -30,
+                        child: Container(
+                          width: 150,
+                          height: 150,
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(20),
+                            color: Colors.white.withOpacity(0.05),
+                            shape: BoxShape.circle,
                           ),
-                          child: Text(
-                            user.role.toUpperCase(),
-                            style: GoogleFonts.plusJakartaSans(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 1.2,
+                        ),
+                      ),
+                      // Konten Profil Utama
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const SizedBox(height: 20),
+                          // Avatar dengan Glow Effect
+                          Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.white, width: 2),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.2),
+                                  blurRadius: 15,
+                                  offset: const Offset(0, 8),
+                                ),
+                              ],
+                            ),
+                            child: CircleAvatar(
+                              radius: 48,
+                              backgroundColor: Colors.white,
+                              backgroundImage: user.avatar != null
+                                  ? NetworkImage(
+                                      Get.find<ApiService>().getImageUrl(
+                                        user.avatar,
+                                      ),
+                                    )
+                                  : null,
+                              child: user.avatar == null
+                                  ? Text(
+                                      user.username.isNotEmpty
+                                          ? user.username[0].toUpperCase()
+                                          : '?',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 36,
+                                        fontWeight: FontWeight.bold,
+                                        color: primaryBlue,
+                                      ),
+                                    )
+                                  : null,
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          user.email,
-                          style: GoogleFonts.plusJakartaSans(
-                            color: Colors.white70,
-                            fontSize: 14,
+                          const SizedBox(height: 12),
+                          // Role Badge (Glassmorphism)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              user.role.toUpperCase(),
+                              style: GoogleFonts.plusJakartaSans(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 1.2,
+                              ),
+                            ),
                           ),
-                        ),
-                        const SizedBox(
-                          height: 30,
-                        ), // Spasi agar tidak tertutup title
-                      ],
-                    ),
-                  ],
+                          const SizedBox(height: 8),
+                          Text(
+                            user.email,
+                            style: GoogleFonts.plusJakartaSans(
+                              color: Colors.white70,
+                              fontSize: 14,
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 30,
+                          ), // Spasi agar tidak tertutup title
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
 
-            // --- 2. MENU ITEMS (ANIMATED LIST) ---
-            SliverPadding(
-              padding: const EdgeInsets.all(20),
-              sliver: SliverList(
-                delegate: SliverChildListDelegate([
-                  // Section Title
-                  _buildSectionHeader("Manajemen Toko"),
-                  const SizedBox(height: 12),
+              // --- 2. MENU ITEMS (ANIMATED LIST) ---
+              SliverPadding(
+                padding: const EdgeInsets.all(20),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate([
+                    // Section Title
+                    _buildSectionHeader("Manajemen Toko"),
+                    const SizedBox(height: 12),
 
-                  // Menu Items dengan Animasi Masuk
-                  _SlideInAnimation(
-                    delay: 100,
-                    child: _buildInteractiveCard(
-                      icon: Iconsax.scissor,
-                      title: 'Kelola Layanan',
-                      subtitle: 'Daftar harga & jenis jahitan',
-                      color: Colors.blue,
-                      onTap: () => Get.to(() => const ServiceListScreen()),
+                    // Menu Items dengan Animasi Masuk
+                    _SlideInAnimation(
+                      delay: 100,
+                      child: _buildInteractiveCard(
+                        icon: Iconsax.scissor,
+                        title: 'Kelola Layanan',
+                        subtitle: 'Daftar harga & jenis jahitan',
+                        color: Colors.blue,
+                        onTap: () => Get.to(() => const ServiceListScreen()),
+                      ),
                     ),
-                  ),
-                  _SlideInAnimation(
-                    delay: 200,
-                    child: _buildInteractiveCard(
-                      icon: Iconsax.gallery,
-                      title: 'Portofolio',
-                      subtitle: 'Update hasil karya terbaru',
-                      color: Colors.orange,
-                      onTap: () => Get.to(() => const PortfolioScreen()),
+                    _SlideInAnimation(
+                      delay: 200,
+                      child: _buildInteractiveCard(
+                        icon: Iconsax.gallery,
+                        title: 'Portofolio',
+                        subtitle: 'Update hasil karya terbaru',
+                        color: Colors.orange,
+                        onTap: () => Get.to(() => const PortfolioScreen()),
+                      ),
                     ),
-                  ),
-                  _SlideInAnimation(
-                    delay: 300,
-                    child: _buildInteractiveCard(
-                      icon: Iconsax.location,
-                      title: 'Lokasi Toko',
-                      subtitle: 'Setting alamat & maps',
-                      color: Colors.purple,
-                      onTap: () => Get.to(() => const ManageLocationScreen()),
+                    _SlideInAnimation(
+                      delay: 300,
+                      child: _buildInteractiveCard(
+                        icon: Iconsax.location,
+                        title: 'Lokasi Toko',
+                        subtitle: 'Setting alamat & maps',
+                        color: Colors.purple,
+                        onTap: () => Get.to(() => const ManageLocationScreen()),
+                      ),
                     ),
-                  ),
 
-                  const SizedBox(height: 24),
-                  _buildSectionHeader("Pengaturan Akun"),
-                  const SizedBox(height: 12),
+                    const SizedBox(height: 24),
+                    _buildSectionHeader("Pengaturan Akun"),
+                    const SizedBox(height: 12),
 
-                  _SlideInAnimation(
-                    delay: 400,
-                    child: _buildInteractiveCard(
-                      icon: Iconsax.edit,
-                      title: 'Edit Profile',
-                      subtitle: 'Ubah data diri Anda',
-                      color: Colors.teal,
-                      onTap: () => Get.to(() => const EditProfileScreen()),
+                    _SlideInAnimation(
+                      delay: 400,
+                      child: _buildInteractiveCard(
+                        icon: Iconsax.edit,
+                        title: 'Edit Profile',
+                        subtitle: 'Ubah data diri Anda',
+                        color: Colors.teal,
+                        onTap: () => Get.to(() => const EditProfileScreen()),
+                      ),
                     ),
-                  ),
 
-                  const SizedBox(height: 12),
+                    const SizedBox(height: 12),
 
-                  _SlideInAnimation(
-                    delay: 500,
-                    child: _buildInteractiveCard(
-                      icon: Iconsax.logout,
-                      title: 'Logout',
-                      subtitle: 'Keluar aplikasi',
-                      color: Colors.red,
-                      isWarning: true,
-                      onTap: controller.logout,
+                    _SlideInAnimation(
+                      delay: 500,
+                      child: _buildInteractiveCard(
+                        icon: Iconsax.logout,
+                        title: 'Logout',
+                        subtitle: 'Keluar aplikasi',
+                        color: Colors.red,
+                        isWarning: true,
+                        onTap: controller.logout,
+                      ),
                     ),
-                  ),
 
-                  // Extra space di bawah agar scroll lebih lega
-                  const SizedBox(height: 50),
-                ]),
+                    // Extra space di bawah agar scroll lebih lega
+                    const SizedBox(height: 50),
+                  ]),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         );
       }),
     );

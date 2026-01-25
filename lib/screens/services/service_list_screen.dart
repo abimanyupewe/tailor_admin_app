@@ -56,100 +56,104 @@ class ServiceListScreen extends StatelessWidget {
           );
         }
 
-        return ListView.separated(
-          padding: const EdgeInsets.all(20),
-          itemCount: controller.services.length,
-          separatorBuilder: (context, index) => const SizedBox(height: 12),
-          itemBuilder: (context, index) {
-            final service = controller.services[index];
-            return Opacity(
-              opacity: service.isActive ? 1.0 : 0.5,
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.05),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(8),
+        return RefreshIndicator(
+          onRefresh: controller.fetchServices,
+          child: ListView.separated(
+            padding: const EdgeInsets.all(20),
+            physics: const AlwaysScrollableScrollPhysics(),
+            itemCount: controller.services.length,
+            separatorBuilder: (context, index) => const SizedBox(height: 12),
+            itemBuilder: (context, index) {
+              final service = controller.services[index];
+              return Opacity(
+                opacity: service.isActive ? 1.0 : 0.5,
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
                       ),
-                      child: const Icon(Iconsax.scissor, color: Colors.blue),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            service.name,
-                            style: GoogleFonts.plusJakartaSans(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Rp ${service.price.toStringAsFixed(0)}',
-                            style: GoogleFonts.plusJakartaSans(
-                              color: Colors.green,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          if (service.description.isNotEmpty)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 4),
-                              child: Text(
-                                service.description,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  color: Colors.grey[600],
-                                  fontSize: 12,
-                                ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(Iconsax.scissor, color: Colors.blue),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              service.name,
+                              style: GoogleFonts.plusJakartaSans(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
                               ),
                             ),
-                        ],
+                            const SizedBox(height: 4),
+                            Text(
+                              'Rp ${service.price.toStringAsFixed(0)}',
+                              style: GoogleFonts.plusJakartaSans(
+                                color: Colors.green,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            if (service.description.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 4),
+                                child: Text(
+                                  service.description,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    color: Colors.grey[600],
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
                       ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Iconsax.edit, color: Colors.orange),
-                      onPressed: () =>
-                          _showServiceDialog(context, controller, service),
-                    ),
-                    IconButton(
-                      icon: const Icon(Iconsax.trash, color: Colors.red),
-                      onPressed: () =>
-                          _confirmDelete(context, controller, service.id),
-                    ),
-                    Transform.scale(
-                      scale: 0.8,
-                      child: Switch(
-                        value: service.isActive,
-                        activeColor: Colors.green,
-                        onChanged: (val) {
-                          controller.updateService(service.id, {
-                            'is_active': val,
-                          });
-                        },
+                      IconButton(
+                        icon: const Icon(Iconsax.edit, color: Colors.orange),
+                        onPressed: () =>
+                            _showServiceDialog(context, controller, service),
                       ),
-                    ),
-                  ],
+                      IconButton(
+                        icon: const Icon(Iconsax.trash, color: Colors.red),
+                        onPressed: () =>
+                            _confirmDelete(context, controller, service.id),
+                      ),
+                      Transform.scale(
+                        scale: 0.8,
+                        child: Switch(
+                          value: service.isActive,
+                          activeColor: Colors.green,
+                          onChanged: (val) {
+                            controller.updateService(service.id, {
+                              'is_active': val,
+                            });
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         );
       }),
     );

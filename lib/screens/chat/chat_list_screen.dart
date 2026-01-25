@@ -52,9 +52,10 @@ class ChatListScreen extends StatelessWidget {
         }
 
         return RefreshIndicator(
-          onRefresh: () => controller.fetchRooms(),
+          onRefresh: controller.fetchRooms,
           child: ListView.separated(
             padding: const EdgeInsets.all(16),
+            physics: const AlwaysScrollableScrollPhysics(),
             itemCount: controller.rooms.length,
             separatorBuilder: (context, index) => const Divider(),
             itemBuilder: (context, index) {
