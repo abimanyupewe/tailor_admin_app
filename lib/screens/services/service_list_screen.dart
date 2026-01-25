@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:tailor_admin_app/controllers/service_controller.dart';
 import 'package:tailor_admin_app/models/service_model.dart';
+import 'package:intl/intl.dart';
 
 class ServiceListScreen extends StatelessWidget {
   const ServiceListScreen({super.key});
@@ -13,24 +14,25 @@ class ServiceListScreen extends StatelessWidget {
     final controller = Get.put(ServiceController());
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6FA),
+      backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
         title: Text(
           'Kelola Layanan',
           style: GoogleFonts.plusJakartaSans(
             fontWeight: FontWeight.bold,
-            color: Colors.black,
+            color: const Color(0xFF1E293B),
+            fontSize: 18,
           ),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(0xFFF8FAFC),
         elevation: 0,
         centerTitle: false,
-        iconTheme: const IconThemeData(color: Colors.black),
+        iconTheme: const IconThemeData(color: Color(0xFF1E293B)),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showServiceDialog(context, controller, null),
-        backgroundColor: const Color(0xFF3F51B5),
-        child: const Icon(Iconsax.add),
+        backgroundColor: const Color(0xFF4F46E5),
+        child: const Icon(Iconsax.add, color: Colors.white),
       ),
       body: Obx(() {
         if (controller.isLoading.value) {
@@ -47,7 +49,7 @@ class ServiceListScreen extends StatelessWidget {
                 Text(
                   'Belum ada layanan',
                   style: GoogleFonts.plusJakartaSans(
-                    color: Colors.grey[600],
+                    color: Colors.grey[500],
                     fontSize: 16,
                   ),
                 ),
@@ -62,16 +64,16 @@ class ServiceListScreen extends StatelessWidget {
             padding: const EdgeInsets.all(20),
             physics: const AlwaysScrollableScrollPhysics(),
             itemCount: controller.services.length,
-            separatorBuilder: (context, index) => const SizedBox(height: 12),
+            separatorBuilder: (context, index) => const SizedBox(height: 16),
             itemBuilder: (context, index) {
               final service = controller.services[index];
               return Opacity(
-                opacity: service.isActive ? 1.0 : 0.5,
+                opacity: service.isActive ? 1.0 : 0.6,
                 child: Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.grey.withOpacity(0.05),
@@ -80,73 +82,152 @@ class ServiceListScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                  child: Row(
+                  child: Column(
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.blue.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Icon(Iconsax.scissor, color: Colors.blue),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              service.name,
-                              style: GoogleFonts.plusJakartaSans(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            width: 48,
+                            height: 48,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF4F46E5).withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Rp ${service.price.toStringAsFixed(0)}',
-                              style: GoogleFonts.plusJakartaSans(
-                                color: Colors.green,
-                                fontWeight: FontWeight.w600,
-                              ),
+                            child: const Icon(
+                              Iconsax.scissor,
+                              color: Color(0xFF4F46E5),
+                              size: 24,
                             ),
-                            if (service.description.isNotEmpty)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 4),
-                                child: Text(
-                                  service.description,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    color: Colors.grey[600],
-                                    fontSize: 12,
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  service.name,
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                    color: const Color(0xFF1E293B),
                                   ),
                                 ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  NumberFormat.currency(
+                                    locale: 'id',
+                                    symbol: 'Rp ',
+                                    decimalDigits: 0,
+                                  ).format(service.price),
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                    color: const Color(0xFF10B981),
+                                  ),
+                                ),
+                                if (service.description.isNotEmpty) ...[
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    service.description,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: GoogleFonts.plusJakartaSans(
+                                      color: Colors.grey[500],
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                                const SizedBox(height: 8),
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Iconsax.timer_1,
+                                      size: 14,
+                                      color: Colors.grey[400],
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      service.duration,
+                                      style: GoogleFonts.plusJakartaSans(
+                                        color: Colors.grey[500],
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                      const SizedBox(height: 12),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Transform.scale(
+                                scale: 0.8,
+                                child: Switch(
+                                  value: service.isActive,
+                                  activeColor: const Color(0xFF10B981),
+                                  onChanged: (val) {
+                                    controller.updateService(service.id, {
+                                      'is_active': val,
+                                    });
+                                  },
+                                ),
                               ),
-                          ],
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Iconsax.edit, color: Colors.orange),
-                        onPressed: () =>
-                            _showServiceDialog(context, controller, service),
-                      ),
-                      IconButton(
-                        icon: const Icon(Iconsax.trash, color: Colors.red),
-                        onPressed: () =>
-                            _confirmDelete(context, controller, service.id),
-                      ),
-                      Transform.scale(
-                        scale: 0.8,
-                        child: Switch(
-                          value: service.isActive,
-                          activeColor: Colors.green,
-                          onChanged: (val) {
-                            controller.updateService(service.id, {
-                              'is_active': val,
-                            });
-                          },
-                        ),
+                              Text(
+                                service.isActive ? 'Aktif' : 'Non-Aktif',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: service.isActive
+                                      ? Colors.grey[700]
+                                      : Colors.grey[400],
+                                ),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              IconButton(
+                                constraints: const BoxConstraints(),
+                                padding: EdgeInsets.zero,
+                                icon: const Icon(
+                                  Iconsax.edit,
+                                  color: Color(0xFF64748B),
+                                  size: 20,
+                                ),
+                                onPressed: () => _showServiceDialog(
+                                  context,
+                                  controller,
+                                  service,
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              IconButton(
+                                constraints: const BoxConstraints(),
+                                padding: EdgeInsets.zero,
+                                icon: const Icon(
+                                  Iconsax.trash,
+                                  color: Color(0xFFEF4444),
+                                  size: 20,
+                                ),
+                                onPressed: () => _confirmDelete(
+                                  context,
+                                  controller,
+                                  service.id,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -193,7 +274,7 @@ class ServiceListScreen extends StatelessWidget {
                 Text(
                   service == null ? 'Tambah Layanan' : 'Edit Layanan',
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 20,
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: const Color(0xFF1E293B),
                   ),
@@ -224,7 +305,7 @@ class ServiceListScreen extends StatelessWidget {
                   label: 'Durasi (misal: 2 Hari)',
                   icon: Iconsax.timer,
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 24),
                 Row(
                   children: [
                     Expanded(
@@ -240,7 +321,7 @@ class ServiceListScreen extends StatelessWidget {
                         child: Text(
                           'Batal',
                           style: GoogleFonts.plusJakartaSans(
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.bold,
                             color: Colors.grey[600],
                           ),
                         ),
@@ -293,7 +374,7 @@ class ServiceListScreen extends StatelessWidget {
                             'base_price': price,
                             'description': descController.text,
                             'estimated_duration_days': durationDays,
-                            'service_type': 'PERMAK',
+                            'service_type': 'PERMAK', // Default
                           };
 
                           if (service == null) {
@@ -301,31 +382,10 @@ class ServiceListScreen extends StatelessWidget {
                           } else {
                             controller.updateService(service.id, data);
                           }
-                          // Dialog closed by controller success/error logic usually,
-                          // but controller logic in this app uses Get.back() inside success?
-                          // Checking service_controller... it shows snackbar.
-                          // It does NOT do Get.back().
-                          // Wait, my previous view_file of ServiceController (from context)
-                          // didn't show Get.back().
-                          // Let's safe bet: Manual Get.back() if success?
-                          // Or rely on controller?
-                          // Usually modifying UI code shouldn't change logic too much.
-                          // But this dialog code is cleaner.
-                          Get.back(); // Close dialog immediately on valid submit?
-                          // Ideally wait for success.
-                          // But for now let's just submit. The old code didn't wait either?
-                          // The old code:
-                          // if (service == null) controller.addService...
-                          // It returned.
-                          // So the dialog stayed open?
-                          // Wait, if I look at old code:
-                          // onPressed: () { ... controller.addService(...) }
-                          // It implies it didn't close automatically unless controller closed it.
-                          // Let's assume controller deals with closing or I should.
-                          // Let's allow closing here for now to be responsive.
+                          Get.back();
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF3F51B5),
+                          backgroundColor: const Color(0xFF4F46E5),
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           elevation: 0,
                           shape: RoundedRectangleBorder(
@@ -335,7 +395,7 @@ class ServiceListScreen extends StatelessWidget {
                         child: Text(
                           'Simpan',
                           style: GoogleFonts.plusJakartaSans(
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.bold,
                             color: Colors.white,
                           ),
                         ),
@@ -380,7 +440,7 @@ class ServiceListScreen extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFF3F51B5), width: 1.5),
+          borderSide: const BorderSide(color: Color(0xFF4F46E5), width: 1.5),
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
@@ -397,10 +457,14 @@ class ServiceListScreen extends StatelessWidget {
   ) {
     Get.defaultDialog(
       title: 'Hapus Layanan',
+      titleStyle: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
       middleText: 'Apakah Anda yakin ingin menghapus layanan ini?',
+      middleTextStyle: GoogleFonts.plusJakartaSans(),
       textConfirm: 'Ya, Hapus',
       textCancel: 'Batal',
       confirmTextColor: Colors.white,
+      buttonColor: const Color(0xFFEF4444),
+      cancelTextColor: Colors.grey[700],
       onConfirm: () {
         controller.deleteService(id);
         Get.back();
