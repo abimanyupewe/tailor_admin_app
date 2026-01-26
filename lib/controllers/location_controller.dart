@@ -45,6 +45,7 @@ class LocationController extends GetxController {
       address.value = addr;
 
       Get.snackbar('Sukses', 'Lokasi berhasil diperbarui');
+      Get.back();
     } catch (e) {
       Get.snackbar('Error', 'Gagal memperbarui lokasi: $e');
     }

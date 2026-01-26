@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:tailor_admin_app/data/api_service.dart';
 import 'package:tailor_admin_app/models/user_model.dart';
@@ -32,7 +33,10 @@ class ProfileController extends GetxController {
   Future<void> updateProfile({
     String? shopName,
     String? bio,
-    String? phoneNumber, // If available in future
+    String? firstName,
+    String? lastName,
+    String? phoneNumber,
+    String? email,
     File? avatarFile,
     File? shopImageFile,
   }) async {
@@ -42,7 +46,10 @@ class ProfileController extends GetxController {
       Map<String, String> data = {};
       if (shopName != null) data['shop_name'] = shopName;
       if (bio != null) data['bio'] = bio;
-      // if (phoneNumber != null) data['phone_number'] = phoneNumber;
+      if (firstName != null) data['first_name'] = firstName;
+      if (lastName != null) data['last_name'] = lastName;
+      if (phoneNumber != null) data['phone_number'] = phoneNumber;
+      if (email != null) data['email'] = email;
 
       await _apiService.updateProfileMultipart(
         data: data,
@@ -50,9 +57,20 @@ class ProfileController extends GetxController {
         shopImageFile: shopImageFile,
       );
 
-      Get.snackbar('Sukses', 'Profil berhasil diperbarui');
       fetchProfile(); // Refresh data
-      Get.back(); // Close edit screen
+
+      Get.defaultDialog(
+        title: "Berhasil",
+        middleText: "Data profil berhasil diperbarui.",
+        textConfirm: "OK",
+        confirmTextColor: Colors.white,
+        buttonColor: const Color(0xFF4F46E5),
+        onConfirm: () {
+          Get.back(); // Close Dialog
+          Get.back(); // Close Screen
+        },
+        barrierDismissible: false,
+      );
     } catch (e) {
       Get.snackbar('Error', 'Gagal memperbarui profil: $e');
     } finally {

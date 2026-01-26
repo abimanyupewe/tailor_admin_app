@@ -5,6 +5,9 @@ class UserModel {
   final String role;
   final bool isActive;
   final String? avatar; // User avatar
+  final String? firstName;
+  final String? lastName;
+  final String? phoneNumber;
 
   // Tailor specific fields
   final String? shopName;
@@ -21,6 +24,9 @@ class UserModel {
     this.shopName,
     this.bio,
     this.shopImage,
+    this.firstName,
+    this.lastName,
+    this.phoneNumber,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -46,6 +52,9 @@ class UserModel {
       role: userData['role'] ?? 'user',
       isActive: userData['is_active'] ?? true,
       avatar: userData['avatar'],
+      firstName: userData['first_name'] ?? '',
+      lastName: userData['last_name'] ?? '',
+      phoneNumber: userData['phone_number'] ?? '',
       shopName: shopName,
       bio: bio,
       shopImage: shopImage,
