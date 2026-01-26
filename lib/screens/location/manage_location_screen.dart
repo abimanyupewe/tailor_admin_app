@@ -6,25 +6,63 @@ import 'package:tailor_admin_app/screens/location/location_picker_screen.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:iconsax/iconsax.dart';
 
-class ManageLocationScreen extends StatelessWidget {
+class ManageLocationScreen extends StatefulWidget {
   const ManageLocationScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final controller = Get.put(LocationController());
-    final addressController = TextEditingController();
-    final latController = TextEditingController();
-    final longController = TextEditingController();
+  State<ManageLocationScreen> createState() => _ManageLocationScreenState();
+}
 
-    // Sync controllers with observable values once loaded
+class _ManageLocationScreenState extends State<ManageLocationScreen> {
+  late LocationController controller;
+  late TextEditingController addressController;
+  late TextEditingController latController;
+  late TextEditingController longController;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = Get.put(LocationController());
+    addressController = TextEditingController();
+    latController = TextEditingController();
+    longController = TextEditingController();
+
+    // Populate initial values if available
+    if (!controller.isLoading.value) {
+      _updateControllers();
+    }
+
+    // Listen to changes to populate once loaded
     ever(controller.isLoading, (loading) {
       if (!loading) {
-        addressController.text = controller.address.value;
-        latController.text = controller.latitude.value.toString();
-        longController.text = controller.longitude.value.toString();
+        _updateControllers();
       }
     });
+  }
 
+  void _updateControllers() {
+    // Only update if controllers are empty to avoid overwriting user edits
+    if (addressController.text.isEmpty) {
+      addressController.text = controller.address.value;
+    }
+    if (latController.text.isEmpty && controller.latitude.value != 0.0) {
+      latController.text = controller.latitude.value.toString();
+    }
+    if (longController.text.isEmpty && controller.longitude.value != 0.0) {
+      longController.text = controller.longitude.value.toString();
+    }
+  }
+
+  @override
+  void dispose() {
+    addressController.dispose();
+    latController.dispose();
+    longController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
@@ -44,14 +82,6 @@ class ManageLocationScreen extends StatelessWidget {
       body: Obx(() {
         if (controller.isLoading.value) {
           return const Center(child: CircularProgressIndicator());
-        }
-
-        // Initial setup if not triggered by ever
-        if (addressController.text.isEmpty &&
-            controller.address.value.isNotEmpty) {
-          addressController.text = controller.address.value;
-          latController.text = controller.latitude.value.toString();
-          longController.text = controller.longitude.value.toString();
         }
 
         return SingleChildScrollView(
@@ -130,16 +160,26 @@ class ManageLocationScreen extends StatelessWidget {
                           );
 
                           if (result != null) {
+                            print('DEBUG: Received from Map: $result');
                             if (result is Map) {
                               final latlng = result['latlng'] as LatLng;
                               final address = result['address'] as String;
 
-                              latController.text = latlng.latitude.toString();
-                              longController.text = latlng.longitude.toString();
-                              addressController.text = address;
+                              setState(() {
+                                latController.text = latlng.latitude.toString();
+                                longController.text = latlng.longitude
+                                    .toString();
+                                addressController.text = address;
+                              });
+                              print(
+                                'DEBUG: Updated Controllers - Lat: ${latController.text}, Lon: ${longController.text}',
+                              );
                             } else if (result is LatLng) {
-                              latController.text = result.latitude.toString();
-                              longController.text = result.longitude.toString();
+                              setState(() {
+                                latController.text = result.latitude.toString();
+                                longController.text = result.longitude
+                                    .toString();
+                              });
                             }
                           }
                         },
@@ -173,6 +213,9 @@ class ManageLocationScreen extends StatelessWidget {
                     final lat = double.tryParse(latController.text) ?? 0.0;
                     final lon = double.tryParse(longController.text) ?? 0.0;
                     final addr = addressController.text;
+                    print(
+                      'DEBUG: ManageLocation Save Pressed. Values: Lat: $lat, Lon: $lon, Addr: $addr',
+                    );
                     controller.updateLocation(lat, lon, addr);
                   },
                   style: ElevatedButton.styleFrom(

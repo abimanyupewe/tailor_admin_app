@@ -209,14 +209,12 @@ class ApiService extends GetxService {
   }
 
   Future<dynamic> setMyLocation(double lat, double lon, String address) async {
+    final body = {'latitude': lat, 'longitude': lon, 'address': address};
+    print('DEBUG: ApiService sending PUT to .../my_location/ with body: $body');
     final response = await http.put(
       Uri.parse('$baseUrl/api/tailor/manage/location/my_location/'),
       headers: _headers,
-      body: json.encode({
-        'latitude': lat,
-        'longitude': lon,
-        'address': address,
-      }),
+      body: json.encode(body),
     );
     return _handleResponse(response);
   }

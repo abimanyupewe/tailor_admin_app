@@ -48,9 +48,12 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
     _currentCenter = LatLng(lat, lng);
     _hasInitialLocation = true; // Show map immediately with whatever we have
 
-    // 2. ALWAYS try to get current GPS location to update map center
-    // This satisfies "lokasi mengikuti lokasi user saat ini"
-    _getCurrentLocation();
+    // 2. We do NOT automatically trigger GPS anymore based on user feedback.
+    // "defaultnya lokasinya selalu disini jangan di buat defaultnya seperti itu"
+    // User can manually press the GPS button if they want to find their location.
+    print(
+      'DEBUG: Init LocationPicker with Lat: $lat, Lng: $lng (Widget: ${widget.initialLat}, ${widget.initialLng})',
+    );
 
     // 3. Reverse geocode the initial point just in case
     _getAddressFromLatLng(_currentCenter);
@@ -178,7 +181,10 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
   }
 
   void _onConfirm() {
-    Get.back(result: {'latlng': _currentCenter, 'address': _address});
+    // Use current camera center for most accurate result
+    Get.back(
+      result: {'latlng': _mapController.camera.center, 'address': _address},
+    );
   }
 
   @override

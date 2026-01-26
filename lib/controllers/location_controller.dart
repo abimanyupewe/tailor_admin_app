@@ -20,6 +20,7 @@ class LocationController extends GetxController {
     try {
       final response = await _apiService.getMyLocation();
       if (response is Map) {
+        print('DEBUG: LocationController fetch response: $response');
         latitude.value =
             double.tryParse(response['latitude'].toString()) ?? 0.0;
         longitude.value =
@@ -28,7 +29,6 @@ class LocationController extends GetxController {
       }
     } catch (e) {
       // Ignore 404 if not set
-      // Get.snackbar('Info', 'Belum ada lokasi diset');
     } finally {
       isLoading.value = false;
     }
@@ -36,12 +36,15 @@ class LocationController extends GetxController {
 
   Future<void> updateLocation(double lat, double lon, String addr) async {
     try {
+      // Direct API Call - Backend is fixed!
       await _apiService.setMyLocation(lat, lon, addr);
+
+      // Update UI
       latitude.value = lat;
       longitude.value = lon;
       address.value = addr;
+
       Get.snackbar('Sukses', 'Lokasi berhasil diperbarui');
-      // Get.back(); // Keep on screen to show success
     } catch (e) {
       Get.snackbar('Error', 'Gagal memperbarui lokasi: $e');
     }
