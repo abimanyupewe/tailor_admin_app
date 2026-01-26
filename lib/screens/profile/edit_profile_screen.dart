@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:tailor_admin_app/constants/app_colors.dart';
 import 'package:tailor_admin_app/controllers/profile_controller.dart';
+import 'package:tailor_admin_app/constants/app_colors.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -91,20 +91,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           'Edit Profil',
           style: GoogleFonts.plusJakartaSans(
             fontWeight: FontWeight.bold,
-            color: const Color(0xFF1E293B),
+            color: Colors.white,
             fontSize: 18,
           ),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.primary,
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Iconsax.arrow_left_2, color: Color(0xFF1E293B)),
+          icon: const Icon(Iconsax.arrow_left_2, color: Colors.white),
           onPressed: () => Get.back(),
-        ),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: Container(color: Colors.grey[200], height: 1),
         ),
       ),
       body: Obx(() {
@@ -113,11 +109,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         }
 
         return SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+          padding: const EdgeInsets.all(24),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Photos Section
+              // Photos Section (Directly part of column, no curved background)
+              const SizedBox(height: 8),
               _buildPhotoSection(user),
               const SizedBox(height: 32),
 
@@ -125,7 +122,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               _buildSectionHeader('Informasi Pribadi'),
               const SizedBox(height: 16),
               Container(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(20),
@@ -158,14 +155,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 20),
                     _buildModernTextField(
                       label: 'Email',
                       controller: _emailController,
                       icon: Iconsax.sms,
                       keyboardType: TextInputType.emailAddress,
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 20),
                     _buildModernTextField(
                       label: 'Nomor HP',
                       controller: _phoneController,
@@ -180,7 +177,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               _buildSectionHeader('Informasi Toko'),
               const SizedBox(height: 16),
               Container(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(20),
@@ -199,7 +196,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       controller: _shopNameController,
                       icon: Iconsax.shop,
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 20),
                     _buildModernTextField(
                       label: 'Bio / Deskripsi',
                       controller: _bioController,
@@ -209,8 +206,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   ],
                 ),
               ),
-
-              const SizedBox(height: 40),
+              const SizedBox(height: 80), // Space for bottom button
             ],
           ),
         );
@@ -274,7 +270,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 ),
                 child: CircleAvatar(
                   radius: 60,
-                  backgroundColor: AppColors.primary.withOpacity(0.1),
+                  backgroundColor: const Color(0xFFEFF6FF),
                   backgroundImage: _avatarFile != null
                       ? FileImage(_avatarFile!)
                       : (user?.avatar != null && user!.avatar!.isNotEmpty)
@@ -292,7 +288,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 ),
               ),
               Positioned(
-                bottom: 0,
+                bottom: 4,
                 right: 4,
                 child: Container(
                   padding: const EdgeInsets.all(10),
@@ -303,7 +299,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     boxShadow: [
                       BoxShadow(
                         color: AppColors.primary.withOpacity(0.4),
-                        blurRadius: 10,
+                        blurRadius: 8,
                         offset: const Offset(0, 4),
                       ),
                     ],
@@ -311,81 +307,106 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   child: const Icon(
                     Iconsax.camera,
                     color: Colors.white,
-                    size: 20,
+                    size: 18,
                   ),
                 ),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 24),
-        GestureDetector(
-          onTap: _pickShopImage,
-          child: Container(
-            height: 160,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: const Color(0xFFEFF6FF),
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: const Color(0xFFE2E8F0)),
-              image: _shopImageFile != null
-                  ? DecorationImage(
-                      image: FileImage(_shopImageFile!),
-                      fit: BoxFit.cover,
-                    )
-                  : (user?.shopImage != null && user!.shopImage!.isNotEmpty)
-                  ? DecorationImage(
-                      image: NetworkImage(user.shopImage!),
-                      fit: BoxFit.cover,
-                    )
-                  : null,
+        const SizedBox(height: 32),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Foto Cover Toko',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFF64748B),
+              ),
             ),
-            child:
-                (_shopImageFile == null &&
-                    (user?.shopImage == null || user!.shopImage!.isEmpty))
-                ? Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
+            const SizedBox(height: 12),
+            GestureDetector(
+              onTap: _pickShopImage,
+              child: Container(
+                height: 160,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEFF6FF),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                  image: _shopImageFile != null
+                      ? DecorationImage(
+                          image: FileImage(_shopImageFile!),
+                          fit: BoxFit.cover,
+                        )
+                      : (user?.shopImage != null && user!.shopImage!.isNotEmpty)
+                      ? DecorationImage(
+                          image: NetworkImage(user.shopImage!),
+                          fit: BoxFit.cover,
+                        )
+                      : null,
+                ),
+                child:
+                    (_shopImageFile == null &&
+                        (user?.shopImage == null || user!.shopImage!.isEmpty))
+                    ? Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.05),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                        child: const Icon(
-                          Iconsax.image,
-                          size: 24,
-                          color: Color(0xFF64748B),
-                        ),
+                            child: const Icon(
+                              Iconsax.image,
+                              size: 24,
+                              color: Color(0xFF64748B),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            'Ketuk untuk ubah cover',
+                            style: GoogleFonts.plusJakartaSans(
+                              color: const Color(0xFF64748B),
+                              fontWeight: FontWeight.w500,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      )
+                    : Stack(
+                        children: [
+                          Positioned(
+                            bottom: 12,
+                            right: 12,
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withOpacity(0.5),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Iconsax.edit,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'Foto Cover Toko',
-                        style: GoogleFonts.plusJakartaSans(
-                          color: const Color(0xFF64748B),
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ],
-                  )
-                : Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(24),
-                      color: Colors.black.withOpacity(0.2),
-                    ),
-                    child: const Center(
-                      child: Icon(Iconsax.edit, color: Colors.white),
-                    ),
-                  ),
-          ),
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -430,9 +451,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           style: GoogleFonts.plusJakartaSans(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: const Color(
-              0xFF1E293B,
-            ), // Darker for readability, or use Primary if requested? Let's use Dark.
+            color: const Color(0xFF64748B),
           ),
         ),
         const SizedBox(height: 8),
@@ -452,11 +471,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               fontSize: 15,
             ),
             decoration: InputDecoration(
-              prefixIcon: Icon(
-                icon,
-                color: AppColors.primary,
-                size: 22,
-              ), // Primary Color
+              prefixIcon: Icon(icon, color: const Color(0xFF94A3B8), size: 22),
               border: InputBorder.none,
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 20,
@@ -465,6 +480,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               hintText: 'Masukkan $label',
               hintStyle: GoogleFonts.plusJakartaSans(
                 color: const Color(0xFFCBD5E1),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(
+                  color: AppColors.primary,
+                  width: 1.5,
+                ),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
               ),
             ),
           ),
