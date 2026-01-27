@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:tailor_admin_app/controllers/profile_controller.dart';
+import 'package:tailor_admin_app/controllers/location_controller.dart';
 
 import 'package:tailor_admin_app/screens/location/manage_location_screen.dart';
 import 'package:tailor_admin_app/screens/profile/edit_profile_screen.dart';
@@ -16,6 +17,7 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(ProfileController());
+    final locationController = Get.put(LocationController());
 
     // Color Palette Modern
     const Color primaryBlue = Color(0xFF4F46E5);
@@ -156,6 +158,86 @@ class ProfileScreen extends StatelessWidget {
                             height: 30,
                           ), // Spasi agar tidak tertutup title
                         ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // --- ADDRESS INFO (NEW) ---
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 0,
+                ),
+                sliver: SliverToBoxAdapter(
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 20),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.06),
+                              blurRadius: 20,
+                              offset: const Offset(0, 10),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                const Icon(
+                                  Iconsax.map,
+                                  color: Color(0xFF4F46E5),
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  "Alamat Toko",
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: const Color(0xFF1E293B),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            Obx(() {
+                              if (locationController.isLoading.value) {
+                                return const Padding(
+                                  padding: EdgeInsets.all(8.0),
+                                  child: Center(
+                                    child: SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              }
+                              return Text(
+                                locationController.address.value.isNotEmpty
+                                    ? locationController.address.value
+                                    : "Belum ada lokasi yang diset.",
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 14,
+                                  color: Colors.grey[600],
+                                  height: 1.5,
+                                ),
+                              );
+                            }),
+                          ],
+                        ),
                       ),
                     ],
                   ),

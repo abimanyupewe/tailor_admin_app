@@ -1,4 +1,6 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:tailor_admin_app/constants/app_colors.dart';
 import 'package:tailor_admin_app/data/api_service.dart';
 
 class LocationController extends GetxController {
@@ -44,7 +46,18 @@ class LocationController extends GetxController {
       longitude.value = lon;
       address.value = addr;
 
-      Get.snackbar('Sukses', 'Lokasi berhasil diperbarui');
+      Get.snackbar(
+        'Sukses',
+        'Lokasi berhasil diperbarui',
+        backgroundColor: AppColors.primary,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(20),
+        borderRadius: 12,
+      );
+      
+      // Give time for snackbar to show before closing
+      await Future.delayed(const Duration(seconds: 2));
       Get.back();
     } catch (e) {
       Get.snackbar('Error', 'Gagal memperbarui lokasi: $e');

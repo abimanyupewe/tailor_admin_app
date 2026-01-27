@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:tailor_admin_app/constants/app_colors.dart';
 import 'package:tailor_admin_app/controllers/location_controller.dart';
 import 'package:tailor_admin_app/screens/location/location_picker_screen.dart';
 import 'package:latlong2/latlong.dart';
@@ -219,13 +220,13 @@ class _ManageLocationScreenState extends State<ManageLocationScreen> {
                     controller.updateLocation(lat, lon, addr);
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF4F46E5),
+                    backgroundColor: AppColors.primary,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     elevation: 0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    shadowColor: const Color(0xFF4F46E5).withOpacity(0.4),
+                    shadowColor: AppColors.primary.withOpacity(0.4),
                   ),
                   child: Text(
                     'Simpan Lokasi',
