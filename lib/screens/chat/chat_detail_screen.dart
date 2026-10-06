@@ -118,7 +118,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
           boxShadow: [
             if (!isMe)
               BoxShadow(
-                color: Colors.grey.withOpacity(0.05),
+                color: Colors.grey.withValues(alpha: 0.05),
                 blurRadius: 5,
                 offset: const Offset(0, 2),
               ),

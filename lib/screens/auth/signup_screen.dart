@@ -29,7 +29,7 @@ class SignupScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.grey.withOpacity(0.1),
+                  color: Colors.grey.withValues(alpha: 0.1),
                   blurRadius: 20,
                   offset: const Offset(0, 10),
                 ),
@@ -126,8 +126,9 @@ class SignupScreen extends StatelessWidget {
                             ),
                           ),
                       validator: (v) {
-                        if (v != passwordController.text)
+                        if (v != passwordController.text) {
                           return 'Password mismatch';
+                        }
                         return null;
                       },
                     ),
